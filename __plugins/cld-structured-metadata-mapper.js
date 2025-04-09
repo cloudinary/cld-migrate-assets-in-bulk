@@ -168,4 +168,8 @@ class CloudinaryMetadataMapper {
     }
 }
 
+/**
+ * Exports the CloudinaryMetadataMapper instance as a plugin
+ * @type {CloudinaryMetadataMapper}
+ */
 module.exports.plugin = new CloudinaryMetadataMapper();
