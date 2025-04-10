@@ -9,16 +9,17 @@ require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
 
 /**
- * Enum for Cloudinary field types
+ * Maps Cloudinary structured metadata field types
+ * from DAM UI to the corresponding API value
  * @readonly
  * @enum {string}
  */
 const CLOUDINARY_FIELD = {
-    String: 'string',
-    Integer: 'integer',
-    Date: 'date',
-    Enum: 'enum',
-    Set: 'set'
+    Text                 : 'string',
+    Number               : 'integer',
+    Date                 : 'date',
+    SingleSelectionList  : 'enum',
+    MultipleSelectionList: 'set'
 }
 
 /**
@@ -121,7 +122,7 @@ class CloudinaryMetadataMapper {
     #processMetadataValue(fieldSchema, value) {
         let sanitizedFieldValue;
         switch (fieldSchema.type) {
-            case CLOUDINARY_FIELD.Set:
+            case CLOUDINARY_FIELD.MultipleSelectionList:
                 //Expecting an array
                 sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema,item));
                 break;
@@ -129,11 +130,11 @@ class CloudinaryMetadataMapper {
                 let date = new Date(value);
                 sanitizedFieldValue = date.toISOString().split('T')[0];
                 break;
-            case CLOUDINARY_FIELD.Enum:
+            case CLOUDINARY_FIELD.SingleSelectionList:
                 sanitizedFieldValue = this.#lookupMetadataValueExternalId(fieldSchema,value);
                 break;
-            case CLOUDINARY_FIELD.Integer:
-            case CLOUDINARY_FIELD.String:
+            case CLOUDINARY_FIELD.Number:
+            case CLOUDINARY_FIELD.Text:
                 sanitizedFieldValue = value;
                 break;
             default:
