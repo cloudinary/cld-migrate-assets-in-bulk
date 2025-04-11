@@ -32,6 +32,16 @@ class MissingFieldError extends Error {
     }
 }
 
+/**
+ * Custom error for when the mapper hasn't been initialized
+ */
+class NotInitializedError extends Error {
+    constructor() {
+        super('CloudinaryMetadataMapper needs to be initialized before use');
+        this.name = 'NotInitializedError';
+    }
+}
+
 
 /**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
@@ -93,13 +103,13 @@ class CloudinaryMetadataMapper {
     /**
      * Loads the metadata structure from Cloudinary and caches it
      * @returns {Object[]} Array of metadata field definitions
-     * @throws {Error} If init() hasn't been called
+     * @throws {NotInitializedError} If init() hasn't been called
      */
     get metadata_structure() {        
         if(this.#metadata_structure) {
             return this.#metadata_structure
         } else {
-            throw new Error(`[${this.className}:metadata_structure] init() needs to be called before use`)
+            throw new NotInitializedError();
         }
     }
 
