@@ -117,10 +117,9 @@ describe("Passing in metadata", () => {
             "SMD SSL": "SSL Option B"
         }
 
-        metadata_mapper.process(uploadOptions,inputFields);
+        metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD SSL'] });
 
         expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_b');
-        expect(Object.keys(inputFields).length).toEqual(0);
     });
 
     it('should update Set values', async () => {
@@ -129,13 +128,12 @@ describe("Passing in metadata", () => {
             "SMD MSL": "MSL Option C, MSL Option A",
         }
 
-        metadata_mapper.process(uploadOptions,inputFields);
+        metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD MSL'] });
 
         console.log(uploadOptions);
         console.log(inputFields);
 
         expect(uploadOptions.metadata.smd_msl).toEqual(['msl_option_c', 'msl_option_a']);
-        expect(Object.keys(inputFields).length).toEqual(0);
     });
 
     it('should ignore an unknown value', async () => {
@@ -145,11 +143,10 @@ describe("Passing in metadata", () => {
             "Does Not Exist": "This"
         }
 
-        metadata_mapper.process(uploadOptions,inputFields);
+        metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD SSL', 'Does Not Exist'] });
 
         expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_c');
-        expect(Object.keys(inputFields).length).toEqual(1);
-        expect(inputFields['Does Not Exist']).toEqual('This');
+        expect(Object.keys(uploadOptions.metadata).length).toEqual(1);
     });
 
     it('should ignore empty values', async () => {
@@ -158,11 +155,25 @@ describe("Passing in metadata", () => {
             "Show hidden": ""
         }
 
-        metadata_mapper.process(uploadOptions,inputFields);
+        metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['Show hidden'] });
 
         expect(uploadOptions.metadata).not.toBeDefined();
     });
     
 
+    it('should throw an error if a field is missing in the input', async () => {
+        const uploadOptions = {};
+        const inputFields = {
+            "SMD MSL": "MSL Option A"
+        };
+
+        // expect to throw error with name set to `MissingFieldError`
+        try {
+            metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['SMD MSL', 'SMD SSL'] });
+            fail('Expected an error to be thrown');
+        } catch (error) {
+            expect(error.name).toEqual('MissingFieldError');
+        }
+    });
 
 })

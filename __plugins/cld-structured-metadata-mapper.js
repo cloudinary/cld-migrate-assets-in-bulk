@@ -21,6 +21,18 @@ const CLOUDINARY_FIELD = {
     MultipleSelectionList: 'set'
 }
 
+
+/**
+ * Custom error for missing input fields during metadata mapping
+ */
+class MissingFieldError extends Error {
+    constructor(fieldName) {
+        super(`Missing required field in input: '${fieldName}'`);
+        this.name = 'MissingFieldError';
+    }
+}
+
+
 /**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
  * Handles different field types and ensures proper formatting of metadata values.
@@ -45,38 +57,39 @@ class CloudinaryMetadataMapper {
     }
 
     /**
-     * Processes input fields and maps them to Cloudinary metadata format
+     * Processes input fields according to optionsand maps them to Cloudinary metadata format
      * @param {Object} upload_options - Cloudinary upload options
      * @param {Object} input_fields - Fields to be processed
      * @param {Object} [options={}] - Additional processing options
-     * @param {string[]} [options.fieldsToIgnore=[]] - List of field names to ignore during processing
+     * @param {string[]} [options.fieldsToMap=[]] - List of field names from `input_fields` to be processed
+     * @throws {MissingFieldError} If a required field is missing in `input_fields`
+     * @returns {Object} The updated upload options with processed metadata
      */
     process(upload_options, input_fields, options = {}) {
-        const { fieldsToIgnore = [] } = options;
-
-        const metadataObject = {
-            ...upload_options.metadata
-        };
-        const remaining_fields = input_fields; //we will update the passed object
-        
-        for (const key in input_fields) {
-            const value = input_fields[key];
-            if (!fieldsToIgnore.includes(key)) {
-                const fieldSchema = this.#lookupFieldSchema(key);
-                if(fieldSchema !== undefined) {
-                    if (value.trim() !== '') {
-                        metadataObject[fieldSchema.external_id] = this.#processMetadataValue(fieldSchema, value);
-                    }
-                    delete remaining_fields[key]; //remove the key even if the value isn't set
-                }
+        const { fieldsToMap = [] } = options;
+    
+        const metadata = { ...upload_options.metadata };
+    
+        for (const fieldName of fieldsToMap) {
+            if (!(fieldName in input_fields)) {
+                throw new MissingFieldError(fieldName);
             }
+    
+            const value = input_fields[fieldName].trim();
+            if (!value) continue;
+    
+            const schema = this.#lookupFieldSchema(fieldName);
+            if (!schema) continue;
+    
+            metadata[schema.external_id] = this.#processMetadataValue(schema, value);
         }
-
-        if (Object.keys(metadataObject).length > 0) {
-            upload_options.metadata = metadataObject;
+    
+        if (Object.keys(metadata).length > 0) {
+            upload_options.metadata = metadata;
         }
     }
 
+    
     /**
      * Loads the metadata structure from Cloudinary and caches it
      * @returns {Object[]} Array of metadata field definitions
