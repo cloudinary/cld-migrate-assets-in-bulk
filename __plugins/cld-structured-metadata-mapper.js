@@ -150,7 +150,10 @@ class CloudinaryMetadataMapper {
      * @param {Object} input_fields - Fields to be processed
      * @param {Object} options - Processing options
      * @param {Object} options.mapping - Mapping from CSV column names to external IDs
+     * @throws {NotInitializedError} If init() hasn't been called
      * @throws {InvalidMappingError} If mapping configuration is invalid
+     * @throws {InvalidDataSourceOptionError} If a value is not found in the datasource
+     * @throws {FailedToProcessMetadataValueError} If a value fails to be processed
      * @returns {Object} The updated upload options with processed metadata
      */
     process(upload_options, input_fields, options) {
@@ -216,7 +219,7 @@ class CloudinaryMetadataMapper {
      * @param {Object} fieldSchema - Field schema from Cloudinary
      * @param {string} value - Value to process
      * @returns {string|string[]|number} Processed value
-     * @throws {Error} If field type is not supported
+     * @throws {Error} If field type is not supported or value cannot be processed
      */
     #processMetadataValue(fieldSchema, value) {
         let sanitizedFieldValue;
@@ -248,7 +251,7 @@ class CloudinaryMetadataMapper {
      * @param {Object} fieldSchema - Field schema from Cloudinary
      * @param {string} option - Value to look up
      * @returns {string} External ID of the value
-     * @throws {Error} If value is not found in the datasource
+     * @throws {InvalidDataSourceOptionError} If value is not found in the datasource
      */
     #lookupMetadataValueExternalId(fieldSchema, option) {    
         // Check external_id first
