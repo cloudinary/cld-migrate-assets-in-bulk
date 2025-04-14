@@ -105,9 +105,10 @@ describe('CloudinaryMetadataMapper', () => {
         it('should throw NotInitializedError when invoking process before initialization', () => {
             const uploadOptions = {};
             const inputFields = { "SMD MSL": "MSL Option A" };
+            const options = { mapping:{ 'SMD MSL' : 'smd_msl' } };
 
             try {
-                metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['SMD MSL'] });
+                metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown')
             } catch (error) {
                 expect(error.name).toEqual('NotInitializedError');
@@ -138,8 +139,9 @@ describe('CloudinaryMetadataMapper', () => {
             const inputFields = {
                 "SMD SSL": "SSL Option B"
             }
+            const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD SSL'] });
+            metadata_mapper.process(uploadOptions,inputFields, options);
 
             expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_b');
         });
@@ -149,33 +151,33 @@ describe('CloudinaryMetadataMapper', () => {
             const inputFields = {
                 "SMD MSL": "MSL Option C, MSL Option A",
             }
+            const options = { mapping:{'SMD MSL' : 'smd_msl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD MSL'] });
-
-            console.log(uploadOptions);
-            console.log(inputFields);
+            metadata_mapper.process(uploadOptions,inputFields, options);
 
             expect(uploadOptions.metadata.smd_msl).toEqual(['msl_option_c', 'msl_option_a']);
         });
 
-        it('should correctly format and store a Date value', async () => {
+        it('should correctly format and store a valid Date value', async () => {
             const uploadOptions = {};
             const inputFields = {
-                "SMD Date": "2024-12-25"
+                "SMD Date": "2024/12/25 12:30:42"
             };
+            const options = { mapping:{'SMD Date' : 'smd_date'} };
         
-            metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['SMD Date'] });
+            metadata_mapper.process(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_date).toEqual("2024-12-25");
         });
 
-        it('should correctly process a Number value', async () => {
+        it('should correctly process a valid Number value', async () => {
             const uploadOptions = {};
             const inputFields = {
                 "SMD Number": "42"
             };
-        
-            metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['SMD Number'] });
+            const options = { mapping:{'SMD Number' : 'smd_number'} };
+
+            metadata_mapper.process(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_number).toEqual("42"); // still a string since no coercion is done
         });
@@ -185,32 +187,43 @@ describe('CloudinaryMetadataMapper', () => {
             const inputFields = {
                 "SMD Text": "  Hello world  "
             };
+            const options = { mapping:{'SMD Text' : 'smd_text'} };
         
-            metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['SMD Text'] });
+            metadata_mapper.process(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_text).toEqual("Hello world");
         });
 
-        it('should ignore an unknown value', async () => {
+        it('should raise an error for an unknown value', async () => {
             const uploadOptions = {};
             const inputFields = {
                 "SMD SSL": "SSL Option C",
                 "Does Not Exist": "This"
             }
+            const options = { 
+                mapping: {
+                    'SMD SSL' : 'smd_ssl', 
+                    'Does Not Exist' : 'does_not_exist'
+                } 
+            };
 
-            metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['SMD SSL', 'Does Not Exist'] });
-
-            expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_c');
-            expect(Object.keys(uploadOptions.metadata).length).toEqual(1);
+            try {
+                metadata_mapper.process(uploadOptions,inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual("InvalidMappingError");
+                expect(error.message).toEqual("External ID 'does_not_exist' not found in metadata structure");
+            }
         });
 
         it('should ignore empty values', async () => {
             const uploadOptions = {};
             const inputFields = {
-                "Show hidden": ""
+                "SMD SSL": ""
             }
+            const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, { fieldsToMap: ['Show hidden'] });
+            metadata_mapper.process(uploadOptions,inputFields, options);
 
             expect(uploadOptions).not.toHaveProperty('metadata');
         });
@@ -221,13 +234,14 @@ describe('CloudinaryMetadataMapper', () => {
             const inputFields = {
                 "SMD MSL": "MSL Option A"
             };
-
-            // expect to throw error with name set to `MissingFieldError`
+            const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
+            
             try {
-                metadata_mapper.process(uploadOptions, inputFields, { fieldsToMap: ['Another Field'] });
+                metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('MissingFieldError');
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("CSV column 'SMD SSL' not found in input fields");
             }
         });
     });

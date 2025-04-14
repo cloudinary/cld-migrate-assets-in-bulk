@@ -21,17 +21,6 @@ const CLOUDINARY_FIELD = {
     MultipleSelectionList: 'set'
 }
 
-
-/**
- * Custom error for missing input fields during metadata mapping
- */
-class MissingFieldError extends Error {
-    constructor(fieldName) {
-        super(`Missing required field in input: '${fieldName}'`);
-        this.name = 'MissingFieldError';
-    }
-}
-
 /**
  * Custom error for when the mapper hasn't been initialized
  */
@@ -42,6 +31,15 @@ class NotInitializedError extends Error {
     }
 }
 
+/**
+ * Custom error for invalid mapping configuration
+ */
+class InvalidMappingError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'InvalidMappingError';
+    }
+}
 
 /**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
@@ -67,39 +65,73 @@ class CloudinaryMetadataMapper {
     }
 
     /**
-     * Processes input fields according to optionsand maps them to Cloudinary metadata format
+     * Validates the mapping configuration
+     * @param {Object} mapping - Mapping from CSV column names to external IDs
+     * @param {Object} input_fields - Input fields to validate against
+     * @throws {InvalidMappingError} If mapping configuration is invalid
+     */
+    validateMapping(mapping, input_fields) {
+        if (!mapping || typeof mapping !== 'object') {
+            throw new InvalidMappingError('Mapping must be an object');
+        }
+
+        // Check for duplicate external IDs
+        const externalIds = new Set();
+        for (const [csvColumn, externalId] of Object.entries(mapping)) {
+            if (externalIds.has(externalId)) {
+                throw new InvalidMappingError(`Duplicate external_id found: '${externalId}'`);
+            }
+            externalIds.add(externalId);
+        }
+
+        // Check if all CSV columns exist in input_fields
+        for (const csvColumn of Object.keys(mapping)) {
+            if (!(csvColumn in input_fields)) {
+                throw new InvalidMappingError(`CSV column '${csvColumn}' not found in input fields`);
+            }
+        }
+
+        // Check if all external IDs exist in metadata structure
+        const validExternalIds = new Set(this.metadata_structure.map(field => field.external_id));
+        for (const externalId of Object.values(mapping)) {
+            if (!validExternalIds.has(externalId)) {
+                throw new InvalidMappingError(`External ID '${externalId}' not found in metadata structure`);
+            }
+        }
+    }
+
+    /**
+     * Processes input fields according to options and maps them to Cloudinary metadata format
      * @param {Object} upload_options - Cloudinary upload options
      * @param {Object} input_fields - Fields to be processed
-     * @param {Object} [options={}] - Additional processing options
-     * @param {string[]} [options.fieldsToMap=[]] - List of field names from `input_fields` to be processed
-     * @throws {MissingFieldError} If a required field is missing in `input_fields`
+     * @param {Object} options - Processing options
+     * @param {Object} options.mapping - Mapping from CSV column names to external IDs
+     * @throws {InvalidMappingError} If mapping configuration is invalid
      * @returns {Object} The updated upload options with processed metadata
      */
-    process(upload_options, input_fields, options = {}) {
-        const { fieldsToMap = [] } = options;
-    
-        const metadata = { ...upload_options.metadata };
-    
-        for (const fieldName of fieldsToMap) {
-            if (!(fieldName in input_fields)) {
-                throw new MissingFieldError(fieldName);
-            }
-    
-            const value = input_fields[fieldName].trim();
-            if (!value) continue;
-    
-            const schema = this.#lookupFieldSchema(fieldName);
-            if (!schema) continue;
-    
-            metadata[schema.external_id] = this.#processMetadataValue(schema, value);
+    process(upload_options, input_fields, options) {
+        if (!options || !options.mapping) {
+            throw new InvalidMappingError('Mapping configuration is required');
         }
-    
+
+        this.validateMapping(options.mapping, input_fields);
+
+        const metadata = { ...upload_options.metadata };
+
+        for (const [csvColumn, externalId] of Object.entries(options.mapping)) {
+            const value = input_fields[csvColumn]?.trim();
+            if (!value) continue;
+
+            const schema = this.#lookupFieldSchema(externalId);
+
+            metadata[externalId] = this.#processMetadataValue(schema, value);
+        }
+
         if (Object.keys(metadata).length > 0) {
             upload_options.metadata = metadata;
         }
     }
 
-    
     /**
      * Loads the metadata structure from Cloudinary and caches it
      * @returns {Object[]} Array of metadata field definitions
@@ -107,30 +139,22 @@ class CloudinaryMetadataMapper {
      */
     get metadata_structure() {        
         if(this.#metadata_structure) {
-            return this.#metadata_structure
+            return this.#metadata_structure;
         } else {
             throw new NotInitializedError();
         }
     }
 
     /**
-     * Looks up a field schema by field name (external_id or label)
+     * Looks up a field schema by external ID
      * @private
-     * @param {string} fieldName - Name of the field to look up
+     * @param {string} externalId - External ID of the field to look up
      * @returns {Object|undefined} Field schema if found, undefined otherwise
      */
-    #lookupFieldSchema(fieldName) { //checks external id and then label
-        //Check external_id first
-        for (let field of this.metadata_structure) {
-            if (field.external_id.trim().toLowerCase() === fieldName.trim().toLowerCase()) {
-                return field;
-            }
-        }
-        for (let field of this.metadata_structure) {
-            if (field.label.trim().toLowerCase() === fieldName.trim().toLowerCase()) {
-                return field;
-            }
-        }
+    #lookupFieldSchema(externalId) {
+        return this.metadata_structure.find(
+            field => field.external_id === externalId
+        );
     }
 
     /**
@@ -145,15 +169,14 @@ class CloudinaryMetadataMapper {
         let sanitizedFieldValue;
         switch (fieldSchema.type) {
             case CLOUDINARY_FIELD.MultipleSelectionList:
-                //Expecting an array
-                sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema,item));
+                sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema, item));
                 break;
             case CLOUDINARY_FIELD.Date:
                 let date = new Date(value);
                 sanitizedFieldValue = date.toISOString().split('T')[0];
                 break;
             case CLOUDINARY_FIELD.SingleSelectionList:
-                sanitizedFieldValue = this.#lookupMetadataValueExternalId(fieldSchema,value);
+                sanitizedFieldValue = this.#lookupMetadataValueExternalId(fieldSchema, value);
                 break;
             case CLOUDINARY_FIELD.Number:
             case CLOUDINARY_FIELD.Text:
@@ -161,7 +184,6 @@ class CloudinaryMetadataMapper {
                 break;
             default:
                 throw new Error(`[${this.className}:processMetadataValue] Field type not found (${fieldSchema.type}) for ${fieldSchema.external_id}`);
-                break;
         }
         return sanitizedFieldValue;
     }
@@ -175,15 +197,15 @@ class CloudinaryMetadataMapper {
      * @throws {Error} If value is not found in the datasource
      */
     #lookupMetadataValueExternalId(fieldSchema, option) {    
-        //Check external_id first
+        // Check external_id first
         for (let value of fieldSchema.datasource.values) {
-            if (value.state === 'active' & value.external_id.toLowerCase() === option.trim().toLowerCase()) {
+            if (value.state === 'active' && value.external_id.toLowerCase() === option.trim().toLowerCase()) {
                 return value.external_id;
             }
         }
-        //Check label if no matches
+        // Check label if no matches
         for (let value of fieldSchema.datasource.values) {
-            if (value.state === 'active' & value.value.toLowerCase() === option.trim().toLowerCase()) {
+            if (value.state === 'active' && value.value.toLowerCase() === option.trim().toLowerCase()) {
                 return value.external_id;
             }
         }
