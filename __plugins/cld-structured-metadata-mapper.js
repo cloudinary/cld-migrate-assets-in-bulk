@@ -52,6 +52,19 @@ class InvalidDataSourceOptionError extends Error {
 }
 
 /**
+ * Custom error to indicate that a metadata value failed to be processed
+ */
+class FailedToProcessMetadataValueError extends Error {
+    constructor(message, cause) {
+        super(message);
+        this.name = 'FailedToProcessMetadataValueError';
+        if (cause) {
+            this.cause = cause;
+        }
+    }
+}
+
+/**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
  * Handles different field types and ensures proper formatting of metadata values.
  */
@@ -133,7 +146,16 @@ class CloudinaryMetadataMapper {
 
             const schema = this.#lookupFieldSchema(externalId);
 
-            metadata[externalId] = this.#processMetadataValue(schema, value);
+            try {
+                metadata[externalId] = this.#processMetadataValue(schema, value);
+            } catch (error) {
+                if (error instanceof InvalidDataSourceOptionError) {
+                    throw error;
+                } else {
+                    // If the error is not one of the expected - "wrap" it in a FailedToProcessMetadataValueError
+                    throw new FailedToProcessMetadataValueError(`Failed to process '${value}' value for the field '${externalId}'`, error);
+                }
+            }
         }
 
         if (Object.keys(metadata).length > 0) {

@@ -294,6 +294,24 @@ describe('CloudinaryMetadataMapper', () => {
             expect(uploadOptions.metadata.smd_date).toEqual("2024-12-25");
         });
 
+        it('should raise an error if a Date value is not in the correct format', async () => {
+            const uploadOptions = {};
+            const inputFields = {
+                "SMD Date": "20241225-123042"
+            };
+            const options = { mapping:{'SMD Date' : 'smd_date'} };
+
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('FailedToProcessMetadataValueError');
+                expect(error.message).toEqual("Failed to process '20241225-123042' value for the field 'smd_date'");
+                expect(error).toHaveProperty('cause');
+                expect(error.cause).toBeInstanceOf(Error);
+            }
+        });
+
         it('should correctly process a valid Number value', async () => {
             const uploadOptions = {};
             const inputFields = {
