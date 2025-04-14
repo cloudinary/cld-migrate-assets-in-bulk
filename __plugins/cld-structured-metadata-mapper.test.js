@@ -101,7 +101,7 @@ const metadata_mapper = require('./cld-structured-metadata-mapper').plugin;
 
 // Must be the first test to ensure that the metadata_structure is not mocked
 describe('CloudinaryMetadataMapper', () => {
-    describe('Not initialized', () => {
+    describe('Not initialized state', () => {
         it('should throw NotInitializedError when invoking process before initialization', () => {
             const uploadOptions = {};
             const inputFields = { "SMD MSL": "MSL Option A" };
@@ -117,7 +117,7 @@ describe('CloudinaryMetadataMapper', () => {
 
     });
 
-    describe('initialized', () => {
+    describe('process', () => {
         beforeAll(async () => {
             jest.spyOn(metadata_mapper, 'init').mockImplementation(async () => {
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -132,6 +132,98 @@ describe('CloudinaryMetadataMapper', () => {
 
         afterAll(() => {
             jest.restoreAllMocks();
+        });
+
+        it('should raise an error if the options are not provided', async () => {
+            const uploadOptions = {};
+            const inputFields = {};
+            const options = {};
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, null);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("Mapping configuration is required");
+            }
+        });
+
+        it('should raise an error if the options.mapping is not provided', async () => {
+            const uploadOptions = {};
+            const inputFields = {};
+            const options = {};
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("Mapping configuration is required");
+            }
+        });
+
+        it('should raise an error if the options.mapping is not an object', async () => {
+            const uploadOptions = {};
+            const inputFields = {};
+            const options = { mapping: "not an object" };
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("Mapping must be an object");
+            }
+        });
+
+        it('should raise an error if mapping has duplicate external_ids (different CSV columns mapped to the same SMD field)', async () => {
+            const uploadOptions = {};
+            const inputFields = {};
+            const options = { mapping: { 'SMD Text' : 'smd_msl', 'SMD SSL' : 'smd_msl' } };
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("Duplicate external_id found: 'smd_msl'");
+            }
+        });
+
+        it('should raise an error if a CSV column from the mapping is not found in the input fields', async () => {
+            const uploadOptions = {};
+            const inputFields = {};
+            const options = { mapping: { 'Does Not Exist' : 'does_not_exist' } };
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("CSV column 'Does Not Exist' not found in input fields");
+            }
+        });
+
+        it('should raise an error if any external_id from the mapping is not found in the metadata_structure', async () => {
+            const uploadOptions = {};
+            const inputFields = { 
+                "SMD Text" : "Hello world",
+                "SMD SSL"  : "SSL Option A"
+            };
+            const options = { 
+                mapping: { 
+                    'SMD Text' : 'does_not_exist',
+                    'SMD SSL'  : 'smd_ssl'
+                } 
+            };
+            
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.message).toEqual("External ID 'does_not_exist' not found in metadata structure");
+            }
         });
 
         it('should update a Enum value', async () => {
