@@ -226,7 +226,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
         });
 
-        it('should update a Enum value', async () => {
+        it('should update a single-select (enum) value', async () => {
             const uploadOptions = {};
             const inputFields = {
                 "SMD SSL": "SSL Option B"
@@ -236,6 +236,22 @@ describe('CloudinaryMetadataMapper', () => {
             metadata_mapper.process(uploadOptions,inputFields, options);
 
             expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_b');
+        });
+
+        it('should raise an error if a single-select (enum) value is not in the field datasource', async () => {
+            const uploadOptions = {};
+            const inputFields = {
+                "SMD SSL": "SSL Option D"
+            };
+            const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
+
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidDataSourceOptionError');
+                expect(error.message).toEqual("Option 'SSL Option D' not found in datasource for the SMD field 'smd_ssl'");
+            }
         });
 
         it('should update Set values', async () => {

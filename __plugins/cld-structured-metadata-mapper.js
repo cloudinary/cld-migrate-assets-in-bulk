@@ -42,6 +42,16 @@ class InvalidMappingError extends Error {
 }
 
 /**
+ * Custom error for invalid datasource option
+ */
+class InvalidDataSourceOptionError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'InvalidDataSourceOptionError';
+    }
+}
+
+/**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
  * Handles different field types and ensures proper formatting of metadata values.
  */
@@ -166,6 +176,10 @@ class CloudinaryMetadataMapper {
      */
     #processMetadataValue(fieldSchema, value) {
         let sanitizedFieldValue;
+
+        console.log(fieldSchema);
+        console.log(value);
+
         switch (fieldSchema.type) {
             case CLOUDINARY_FIELD.MultipleSelectionList:
                 sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema, item));
@@ -208,7 +222,7 @@ class CloudinaryMetadataMapper {
                 return value.external_id;
             }
         }
-        throw Error(`[${this.className}:lookupMetadataValueExternalId] Field Value not found: ${option.trim()} for ${fieldSchema.external_id}`);
+        throw new InvalidDataSourceOptionError(`Option '${option.trim()}' not found in datasource for the SMD field '${fieldSchema.external_id}'`);
     }
 }
 
