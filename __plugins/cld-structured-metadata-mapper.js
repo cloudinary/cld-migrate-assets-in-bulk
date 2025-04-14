@@ -177,9 +177,6 @@ class CloudinaryMetadataMapper {
     #processMetadataValue(fieldSchema, value) {
         let sanitizedFieldValue;
 
-        console.log(fieldSchema);
-        console.log(value);
-
         switch (fieldSchema.type) {
             case CLOUDINARY_FIELD.MultipleSelectionList:
                 sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema, item));

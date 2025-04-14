@@ -254,7 +254,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
         });
 
-        it('should update Set values', async () => {
+        it('should update multi-select (set) values', async () => {
             const uploadOptions = {};
             const inputFields = {
                 "SMD MSL": "MSL Option C, MSL Option A",
@@ -266,6 +266,22 @@ describe('CloudinaryMetadataMapper', () => {
             expect(uploadOptions.metadata.smd_msl).toEqual(['msl_option_c', 'msl_option_a']);
         });
 
+        it('should raise an error if a multi-select (set) value is not in the field datasource', async () => {
+            const uploadOptions = {};
+            const inputFields = {
+                "SMD MSL": "MSL Option A, MSL Option B, MSL Option D"
+            };
+            const options = { mapping:{'SMD MSL' : 'smd_msl'} };
+
+            try {
+                metadata_mapper.process(uploadOptions, inputFields, options);
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error.name).toEqual('InvalidDataSourceOptionError');
+                expect(error.message).toEqual("Option 'MSL Option D' not found in datasource for the SMD field 'smd_msl'");
+            }
+        });
+        
         it('should correctly format and store a valid Date value', async () => {
             const uploadOptions = {};
             const inputFields = {
