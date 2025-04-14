@@ -69,7 +69,7 @@ class CloudinaryMetadataMapper {
      * @param {Object} input_fields - Input fields to validate against
      * @throws {InvalidMappingError} If mapping configuration is invalid
      */
-    validateMapping(mapping, input_fields) {
+    #validateMapping(mapping, input_fields) {
         if (!mapping || typeof mapping !== 'object') {
             throw new InvalidMappingError('Mapping must be an object');
         }
@@ -113,7 +113,7 @@ class CloudinaryMetadataMapper {
             throw new InvalidMappingError('Mapping configuration is required');
         }
 
-        this.validateMapping(options.mapping, input_fields);
+        this.#validateMapping(options.mapping, input_fields);
 
         const metadata = { ...upload_options.metadata };
 
