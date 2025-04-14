@@ -96,6 +96,14 @@ const MOCK_SMD_STRUCTURE = [
     }
 ]
 
+const MOCK_PLUGIN_NAME = 'cld-structured-metadata-mapper';
+const MOCK_ERROR_NAMES = {
+    NotInitialized              : `${MOCK_PLUGIN_NAME}:NotInitializedError`,
+    InvalidMapping              : `${MOCK_PLUGIN_NAME}:InvalidMappingError`,
+    InvalidDataSourceOption     : `${MOCK_PLUGIN_NAME}:InvalidDataSourceOptionError`,
+    FailedToProcessMetadataValue: `${MOCK_PLUGIN_NAME}:FailedToProcessMetadataValueError`
+}
+
 const metadata_mapper = require('./cld-structured-metadata-mapper').plugin;
 
 
@@ -111,7 +119,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown')
             } catch (error) {
-                expect(error.name).toEqual('NotInitializedError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.NotInitialized);
             }
         });
 
@@ -143,7 +151,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, null);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("Mapping configuration is required");
             }
         });
@@ -157,7 +165,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("Mapping configuration is required");
             }
         });
@@ -171,7 +179,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("Mapping must be an object");
             }
         });
@@ -185,7 +193,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("Duplicate external_id found: 'smd_msl'");
             }
         });
@@ -199,7 +207,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("CSV column 'Does Not Exist' not found in input fields");
             }
         });
@@ -221,7 +229,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("External ID 'does_not_exist' not found in metadata structure");
             }
         });
@@ -249,7 +257,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidDataSourceOptionError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidDataSourceOption);
                 expect(error.message).toEqual("Option 'SSL Option D' not found in datasource for the SMD field 'smd_ssl'");
             }
         });
@@ -277,7 +285,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidDataSourceOptionError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidDataSourceOption);
                 expect(error.message).toEqual("Option 'MSL Option D' not found in datasource for the SMD field 'smd_msl'");
             }
         });
@@ -305,7 +313,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('FailedToProcessMetadataValueError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.FailedToProcessMetadataValue);
                 expect(error.message).toEqual("Failed to process '20241225-123042' value for the field 'smd_date'");
                 expect(error).toHaveProperty('cause');
                 expect(error.cause).toBeInstanceOf(Error);
@@ -353,7 +361,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions,inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual("InvalidMappingError");
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("External ID 'does_not_exist' not found in metadata structure");
             }
         });
@@ -382,7 +390,7 @@ describe('CloudinaryMetadataMapper', () => {
                 metadata_mapper.process(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
-                expect(error.name).toEqual('InvalidMappingError');
+                expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
                 expect(error.message).toEqual("CSV column 'SMD SSL' not found in input fields");
             }
         });

@@ -1,11 +1,37 @@
 /**
  * @fileoverview A plugin for mapping and transforming metadata fields for Cloudinary uploads.
  * @module cld-structured-metadata-mapper
+ * 
+ * @description
+ * 
+ * 💡 CONCEPT:
+ *  
+ * Performs typical data transformation required for Cloudinary Structured Metadata Values.
+ * Examples: 
+ *  - resolve external_id values for single- or multi-select fields from labels
+ *  - format date values
+ * 
+ * This allows migration data files to provide "business" values.
+ * The module translates "business" values to "Cloudinary API" values as per SMD field configuration.
+ * 
+ * ⚙️ IMPLEMENTATION:
+ *  - Structured metadata field definitions are obtained via Cloudinary API during plugin initialization
+ *  - The `process` method is invoked from the `__input-to-api-payload` module
+ *      - It receives reference to `upload_options` (represents options for upload API request to be made for the migrated asset)
+ *      - It receives reference to `input_fields` (represents CSV record from migration data file)
+ *      - It receives options with list of {<CSV column> : <smd_field_external_id>} mappings
+ *  - The `process` method then uses the input to
+ *      - Find definition for each target SMD field from the options.mapping
+ *      - Resolve the value to be passed to upload API call
+ *      - Updates `upload_options.metadata` accordingly
  */
 
 'use strict';
 
+const path = require('path');
 const cloudinary = require('cloudinary').v2;
+
+const PLUGIN_NAME = path.parse(__filename).name;
 
 /**
  * Maps Cloudinary structured metadata field types
@@ -27,7 +53,7 @@ const CLOUDINARY_FIELD = {
 class NotInitializedError extends Error {
     constructor() {
         super('CloudinaryMetadataMapper needs to be initialized before use');
-        this.name = 'NotInitializedError';
+        this.name = `${PLUGIN_NAME}:NotInitializedError`;
     }
 }
 
@@ -37,7 +63,7 @@ class NotInitializedError extends Error {
 class InvalidMappingError extends Error {
     constructor(message) {
         super(message);
-        this.name = 'InvalidMappingError';
+        this.name = `${PLUGIN_NAME}:InvalidMappingError`;
     }
 }
 
@@ -47,7 +73,7 @@ class InvalidMappingError extends Error {
 class InvalidDataSourceOptionError extends Error {
     constructor(message) {
         super(message);
-        this.name = 'InvalidDataSourceOptionError';
+        this.name = `${PLUGIN_NAME}:InvalidDataSourceOptionError`;
     }
 }
 
@@ -57,7 +83,7 @@ class InvalidDataSourceOptionError extends Error {
 class FailedToProcessMetadataValueError extends Error {
     constructor(message, cause) {
         super(message);
-        this.name = 'FailedToProcessMetadataValueError';
+        this.name = `${PLUGIN_NAME}:FailedToProcessMetadataValueError`;
         if (cause) {
             this.cause = cause;
         }
