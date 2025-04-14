@@ -72,10 +72,6 @@ class CloudinaryMetadataMapper {
     /** @private */
     #metadata_structure
 
-    constructor() {
-        this.className = "CloudinaryMetadataMapper";
-    }
-
     /**
      * Initializes the mapper by fetching metadata field definitions from Cloudinary
      * @async
@@ -215,7 +211,7 @@ class CloudinaryMetadataMapper {
                 sanitizedFieldValue = value;
                 break;
             default:
-                throw new Error(`[${this.className}:processMetadataValue] Field type not found (${fieldSchema.type}) for ${fieldSchema.external_id}`);
+                throw new Error(`Field type not found (${fieldSchema.type}) for ${fieldSchema.external_id}`);
         }
         return sanitizedFieldValue;
     }
