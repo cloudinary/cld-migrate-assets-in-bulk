@@ -50,7 +50,6 @@ class CloudinaryMetadataMapper {
     #metadata_structure
 
     constructor() {
-        this.name = "metadata_mapper";
         this.className = "CloudinaryMetadataMapper";
     }
 
