@@ -3,6 +3,7 @@
   "bin": {
     "cld-bulk": "./cld-bulk.js"
   },
+  "license": "MIT",
   "dependencies": {
     "async": "^3.2.4",
     "bunyan": "^1.8.15",
