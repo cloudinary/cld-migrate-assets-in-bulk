@@ -22,5 +22,5 @@
   "scripts": {
     "test": "node ./test/jest.run-all-tests.js"
   },
-  "version": "2.1.1"
+  "version": "2.1.2"
 }
