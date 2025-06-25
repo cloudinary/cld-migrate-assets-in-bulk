@@ -1,5 +1,13 @@
 # CHANGELOG
 
+[2.1.2] / 2025-06-25
+====================
+
+### Changed
+- Added an MIT license file to define the tool's open-source licensing terms
+- Updated outdated dependencies to latest compatible versions.
+
+
 [2.1.1] / 2024-12-30
 ====================
 
