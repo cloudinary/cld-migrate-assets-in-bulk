@@ -1,6 +1,8 @@
 # What it is
 🚚 A script that can be used to migrate assets to Cloudinary from sources supported by [Cloudinary Upload API](https://cloudinary.com/documentation/image_upload_api_reference#upload_required_parameters) in scenarios when gradual migration with [Cloudinary auto-upload feature](https://cloudinary.com/documentation/fetch_remote_images#auto_upload_remote_files) cannot be leveraged.
 
+**⚠️ Disclaimer**: This tool is provided "as is" under MIT license. You are solely responsible for how you use it and the results it produces. Please review the source code and test the tool thoroughly before applying it to production environments.
+
 It is assumed that the migration problem is addressed in stages:
 
 - **Stage #1** 🛠️ Prepare input CSV file for the asset migration (with the tools of your choice)
@@ -31,3 +33,6 @@ Follow these steps to successfully migrate your assets:
 
 # How to Tweak It
 Things to know are covered in the [🧑‍💻 dev readme](./readme/dev/readme.md).
+
+# License
+Released under the MIT license.
