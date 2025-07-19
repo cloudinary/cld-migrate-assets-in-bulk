@@ -35,7 +35,7 @@ exports.input2ApiPayload = function(csvRec) {
         public_id:       csvRec['Asset_Public_Id_ColumnName'],     // Pass value to be used as public_id (addressed by column name from the input CSV file)
         unique_filename: false,                                    // Do not add random suffix to the public_id
         resource_type:   'auto',                                   // Let Cloudinary determine the resource type
-        overwrite:       false,                                    // Do not overwrite the asset with same public_id if it already exists
+        overwrite:       false,                                    // Do not overwrite the asset with same public_id if it already exists (good idea if migrating to an account with existing assets)
         type:            'upload',                                 // Explicitly set delivery type
         tags:            csvRec['Asset_Tags_ColumnName'],          // Pass value to be set as tags on the uploaded asset (addressed by column name from the input CSV file)
 
