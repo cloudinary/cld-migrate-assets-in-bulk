@@ -3,9 +3,6 @@
  * into Cloudinary Upload API payload.
  */
 
-// Loading plugin manager
-const pluginManager = require('./lib/plugins/plugin-manager');
-
 /**
  * Converts a CSV record from migration input file to a Cloudinary API payload.
  * 
@@ -23,6 +20,11 @@ const pluginManager = require('./lib/plugins/plugin-manager');
  *  - file: the URL to obtain the asset from
  *  - options: options for the Cloudinary Upload API call
  */
+
+// Loading plugin manager. 
+// Consult ./readme/plugins.md for more details
+const pluginManager = require('./lib/plugins/plugin-manager');
+
 exports.input2ApiPayload = function(csvRec) {
     // Where to load the asset from 
     // Any source supported by Cloudinary Upload API: https://cloudinary.com/documentation/upload_parameters#required_file_parameter
