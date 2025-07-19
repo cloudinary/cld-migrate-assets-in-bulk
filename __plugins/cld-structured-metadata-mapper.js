@@ -145,16 +145,21 @@ class CloudinaryMetadataMapper {
     }
 
     /**
-     * Processes input fields according to options and maps them to Cloudinary metadata format
+     * Processes SMD field values according to mapping provided in options.mapping
+     * 
+     * Side effect: updates `upload_options.metadata` with the processed metadata values
+     * 
      * @param {Object} upload_options - Cloudinary upload options
      * @param {Object} input_fields - Fields to be processed
      * @param {Object} options - Processing options
      * @param {Object} options.mapping - Mapping from CSV column names to external IDs
+     * 
      * @throws {NotInitializedError} If init() hasn't been called
      * @throws {InvalidMappingError} If mapping configuration is invalid
      * @throws {InvalidDataSourceOptionError} If a value is not found in the datasource
      * @throws {FailedToProcessMetadataValueError} If a value fails to be processed
-     * @returns {Object} The updated upload options with processed metadata
+     * 
+     * @returns {Object} The processed metadata values (for reporting purposes)
      */
     process(upload_options, input_fields, options) {
         if (!options || !options.mapping) {
@@ -165,6 +170,8 @@ class CloudinaryMetadataMapper {
 
         const metadata = { ...upload_options.metadata };
 
+        const processedEntries = {};
+
         for (const [csvColumn, externalId] of Object.entries(options.mapping)) {
             const value = input_fields[csvColumn]?.trim();
             if (!value) continue;
@@ -173,6 +180,7 @@ class CloudinaryMetadataMapper {
 
             try {
                 metadata[externalId] = this.#processMetadataValue(schema, value);
+                processedEntries[csvColumn] = metadata[externalId];
             } catch (error) {
                 if (error instanceof InvalidDataSourceOptionError) {
                     throw error;
@@ -186,6 +194,8 @@ class CloudinaryMetadataMapper {
         if (Object.keys(metadata).length > 0) {
             upload_options.metadata = metadata;
         }
+
+        return processedEntries;
     }
 
     /**
