@@ -47,8 +47,9 @@ exports.input2ApiPayload = function(csvRec) {
         metadata: {
             'smd_field_external_id_a': csvRec['Column A'],         // Structured metadata can be assigned explicitly using values from CSV file
                                                                    // This approach will work for straight-forward cases (few values to map)
-                                                                   // For involved scenarios (hundreds/thousands of options for single- or multi-select fields)
-                                                                   // it's recommended to use cld-structured-metadata-mapper plugin (example below) 
+                                                                   // For involved scenarios (hundreds/thousands of options for single- or multi-select fields
+                                                                   // that need to be mapped to Cloudinary external_id values for API operations)
+                                                                   // it is recommended to use cld-structured-metadata-mapper plugin (example below) 
                                                                    // to map values from CSV file to Cloudinary API values
         }
     };
