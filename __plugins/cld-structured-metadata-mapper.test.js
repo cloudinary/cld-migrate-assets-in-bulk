@@ -127,7 +127,7 @@ describe('CloudinaryMetadataMapper', () => {
 
     describe('process', () => {
         beforeAll(async () => {
-            jest.spyOn(metadata_mapper, 'init').mockImplementation(async () => {
+            jest.spyOn(metadata_mapper, 'init_Async').mockImplementation(async () => {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 // Mocking the private #metadata_structure class property
                 Object.defineProperty(metadata_mapper, 'metadata_structure', {
@@ -135,7 +135,7 @@ describe('CloudinaryMetadataMapper', () => {
                 });
             });
 
-            await metadata_mapper.init();
+            await metadata_mapper.init_Async();
         });
 
         afterAll(() => {

@@ -103,7 +103,7 @@ class CloudinaryMetadataMapper {
      * @async
      * @throws {Error} If Cloudinary API call fails
      */
-    async init() {
+    async init_Async() {
         const metadataResult = await cloudinary.api.list_metadata_fields();
         this.#metadata_structure = metadataResult.metadata_fields;
     }
