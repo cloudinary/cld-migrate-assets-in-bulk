@@ -54,7 +54,9 @@ exports.input2ApiPayload = function(csvRec) {
         }
     };
 
-    // Example: Assigning structured metadata
+    // Example: Using plugin to map "business" values from CSV file to external_id values for Cloudinary API
+    //          Plugin fetches SMD field definitions to automatically map values (labels) from CSV file to external_id values
+    //          or apply formatting for date values for the fields specified in the mapping
     const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin('cld-structured-metadata-mapper');
     CloudinaryStructuredMetadataMapper.process(options, csvRec, {
         'Column B': 'smd_field_external_id_a', // Map values from 'Column A' CSV column to 'smd_field_external_id_a' SMD field
