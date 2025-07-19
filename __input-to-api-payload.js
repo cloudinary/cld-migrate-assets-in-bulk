@@ -3,6 +3,9 @@
  * into Cloudinary Upload API payload.
  */
 
+// Loading plugin manager
+const pluginManager = require('./lib/plugins/plugin-manager');
+
 /**
  * Converts a CSV record from migration input file to a Cloudinary API payload.
  * 
@@ -40,14 +43,22 @@ exports.input2ApiPayload = function(csvRec) {
         context: {
             caption: csvRec['Asset_Description_ColumnName'],       // Pass value to be set as caption field in contextual metadata (addressed by column name from the input CSV file)
         },
-
         
-        // Example: Assigning structured metadata
-        // See specs at https://cloudinary.com/documentation/structured_metadata
         metadata: {
-            sample_field: csvRec['SampleField_Value_ColumnName'],  // Pass value to the structured metadata field with external_id of 'sample_field' (addressed by column name from the input CSV file)
-        },
+            'smd_field_external_id_a': csvRec['Column A'],         // Structured metadata can be assigned explicitly using values from CSV file
+                                                                   // This approach will work for straight-forward cases (few values to map)
+                                                                   // For involved scenarios (hundreds/thousands of options for single- or multi-select fields)
+                                                                   // it's recommended to use cld-structured-metadata-mapper plugin (example below) 
+                                                                   // to map values from CSV file to Cloudinary API values
+        }
     };
+
+    // Example: Assigning structured metadata
+    const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin('cld-structured-metadata-mapper');
+    CloudinaryStructuredMetadataMapper.process(options, csvRec, {
+        'Column B': 'smd_field_external_id_a', // Map values from 'Column A' CSV column to 'smd_field_external_id_a' SMD field
+        'Column C': 'smd_field_external_id_b'  // Map values from 'Column B' CSV column to 'smd_field_external_id_b' SMD field
+    });
 
     return { file, options };
 }
