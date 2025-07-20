@@ -46,6 +46,8 @@ exports.input2ApiPayload = function(csvRec) {
             caption: csvRec['Asset_Description_ColumnName'],       // Pass value to be set as caption field in contextual metadata (addressed by column name from the input CSV file)
         },
         
+        // Example: Assigning structured metadata
+        // See specs at https://cloudinary.com/documentation/structured_metadata
         metadata: {
             'smd_field_external_id_a': csvRec['Column A'],         // Structured metadata can be assigned explicitly using values from CSV file
                                                                    // This approach will work for straight-forward cases (few values to map)
@@ -56,10 +58,27 @@ exports.input2ApiPayload = function(csvRec) {
         }
     };
 
-    // Object to pass output of plugins used (to include in the log record for easier troubleshooting)
-    const plugins_trace = {};
-    
-    
+    // Applying plugins and collecting their output in order they are applied
+    const plugins_trace = [];
+    const smdPluginTrace = applyStructuredMetadataMapperPlugin(options, csvRec);
+    plugins_trace.push(smdPluginTrace);
+
+    // Returning the payload and the trace of the plugins applied
+    return {
+        "payload"       : { file, options }, // Payload for Cloudinary API call
+        "plugins_trace" : plugins_trace      // Output produced by plugins to include in the log. Return empty object if no plugins are used.
+    };
+}
+
+
+/**
+ * Applies the structured metadata mapper plugin to the Upload API options.
+ * 
+ * @param {Object} options - The options for the Cloudinary Upload API call
+ * @param {Object} csvRec - The CSV record from the migration input file
+ * @returns {Object} - The trace of the plugin applied
+ */
+function applyStructuredMetadataMapperPlugin(options, csvRec) {
     // Example: Using plugin to map "business" values from CSV file to external_id values for Cloudinary API
     //          Plugin fetches SMD field definitions to automatically map values (labels) from CSV file to external_id values
     //          or apply formatting for date values for the fields specified in the mapping
@@ -69,12 +88,7 @@ exports.input2ApiPayload = function(csvRec) {
         'Column B': 'smd_field_external_id_a', // Map values from 'Column A' CSV column to 'smd_field_external_id_a' SMD field
         'Column C': 'smd_field_external_id_b'  // Map values from 'Column B' CSV column to 'smd_field_external_id_b' SMD field
     });
-    // Storing output of the plugin to include in the log record for the migration operation
-    plugins_trace[smdPluginName] = resolvedSmdValues;
 
-
-    return {
-        "payload"       : { file, options }, // Payload for Cloudinary API call
-        "plugins_trace" : plugins_trace      // Output produced by plugins to include in the log. Return empty object if no plugins are used.
-    };
+    // Storing output of the plugin to include in the combined log record
+    return { name: smdPluginName, trace: resolvedSmdValues };
 }
