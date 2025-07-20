@@ -173,7 +173,7 @@ class CloudinaryMetadataMapper {
 
         const metadata = { ...upload_options.metadata };
 
-        const processedEntries = {};
+        const processedEntries = [];
 
         for (const [csvColumn, externalId] of Object.entries(options.mapping)) {
             const value = input_fields[csvColumn]?.trim();
@@ -183,7 +183,11 @@ class CloudinaryMetadataMapper {
 
             try {
                 metadata[externalId] = this.#processMetadataValue(schema, value);
-                processedEntries[csvColumn] = metadata[externalId];
+                processedEntries.push({
+                    csv_column_name      : csvColumn,
+                    resolved_external_id : externalId,
+                    resolved_values      : metadata[externalId]
+                });
             } catch (error) {
                 if (error instanceof InvalidDataSourceOptionError) {
                     throw error;
