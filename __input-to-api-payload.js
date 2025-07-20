@@ -89,11 +89,13 @@ async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
     const smdPluginName = 'cld-structured-metadata-mapper';
     const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin(smdPluginName);
     const resolvedSmdValues = await CloudinaryStructuredMetadataMapper.process_Async(options, csvRec, {
-        'SMD Text CSV Column Name': 'smd_text_field_external_id', // Map text values from CSV file to 'smd_text_field_external_id' SMD field
-        'SMD Num CSV Column Name' : 'smd_num_field_external_id',  // Map numeric values from CSV file to 'smd_num_field_external_id' SMD field
-        'SMD Date CSV Column Name': 'smd_date_field_external_id', // Map date values from CSV file to 'smd_date_field_external_id' SMD field
-        'SMD SSL CSV Column Name' : 'smd_ssl_field_external_id',  // Map single-select values (assumed to be labels) from CSV file to 'smd_ssl_field_external_id' SMD field
-        'SMD MSL CSV Column Name' : 'smd_msl_field_external_id'   // Map multi-select values (assumed to be labels) from CSV file to 'smd_msl_field_external_id' SMD field
+        mapping : {
+            'SMD Text CSV Column Name': 'smd_text_field_external_id', // Map text values from CSV file to 'smd_text_field_external_id' SMD field
+            'SMD Num CSV Column Name' : 'smd_num_field_external_id',  // Map numeric values from CSV file to 'smd_num_field_external_id' SMD field
+            'SMD Date CSV Column Name': 'smd_date_field_external_id', // Map date values from CSV file to 'smd_date_field_external_id' SMD field
+            'SMD SSL CSV Column Name' : 'smd_ssl_field_external_id',  // Map single-select values (assumed to be labels) from CSV file to 'smd_ssl_field_external_id' SMD field
+            'SMD MSL CSV Column Name' : 'smd_msl_field_external_id'   // Map multi-select values (assumed to be labels) from CSV file to 'smd_msl_field_external_id' SMD field
+        }
     });
 
     // Storing output of the plugin to include in the combined log record
