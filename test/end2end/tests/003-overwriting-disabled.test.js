@@ -14,14 +14,17 @@ jest.mock('../../../__input-to-api-payload', () => {
     return {
         input2ApiPayload: jest.fn((csvRec) => {
             return {
-                file: csvRec.Ref,
-                options: {
-                    public_id: csvRec.public_id,
-                    unique_filename: false,
-                    overwrite: false, // << Disable overwriting assets
-                    resource_type: 'auto',
-                    type: 'upload',        
-                }
+                "payload" : {
+                    file: csvRec.Ref,
+                    options: {
+                        public_id: csvRec.public_id,
+                        unique_filename: false,
+                        overwrite: false, // << Disable overwriting assets
+                        resource_type: 'auto',
+                        type: 'upload',        
+                    }
+                },
+                "plugins_trace": {}
             };
         })
     };
