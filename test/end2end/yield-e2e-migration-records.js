@@ -1,15 +1,13 @@
 /*
     Yields the migration records for the E2E tests
 */
+const fs = require('fs');
+const path = require('path');
+const { parse } = require('csv-parse/sync');
+const { stringify } = require('csv-stringify/sync');
+
 const testResources = require('../resources');
 
-//
-// Persisted to CSV file used as input for the end-to-end test
-// Keys are to be used as asset public_ids
-// Values will be expanded into CSV columns 
-//
-// Split into positive / negative to allow referencing separately in the tests
-//
 
 const _TEST_ASSET_REFS_POSITIVE = {
     test_asset_ref_remote_small         : 'https://res.cloudinary.com/cld-sol-demo/image/upload/sample.jpg',
@@ -38,6 +36,13 @@ const _TEST_INPUT_NEGATIVE = {
 }
 
 // Adding bulk tests
+//
+// Persisted to CSV file used as input for the end-to-end test
+// Keys are to be used as asset public_ids
+// Values will be expanded into CSV columns 
+//
+// Split into positive / negative to allow referencing separately in the tests
+//
 const _TEST_CASE_BULK_SIZE = 100; // Number of records to generate for each test case
 
 const _BULK_TEST_CASES_POSITIVE_REMOTE = new Object();
@@ -94,10 +99,54 @@ function reduceTestRecords(toNoOfRecords, fromTestDataObj) {
     return reducedTestData;
 }
 
+/**
+ * Template CSV file is a CSV file with asset records where one column (asset references)
+ * has keys from the `_TEST_ASSET_REFS_POSITIVE` or `_TEST_ASSET_REFS_NEGATIVE` objects to avoid duplication.
+ * 
+ * This function creates actual CSV asset data file from the template file by replacing the reference column 
+ * with the actual values corresponding to the keys.
+ * 
+ * @param {string} templateCSVFilePath - Path to the template CSV file
+ * @param {string} refColName - Name of the column to replace with the provided values
+ * @param {string} outputCSVFilePath - Path to the output CSV file
+ * @param {Object} values - Object with keys as the column names and values as the values to replace the reference column with
+ * @returns {string} - Path to the output CSV file
+ */
+function fromTemplateCSVFile(templateCSVFilePath, refColName, outputCSVFilePath) {
+    // Load template CSV
+    const csvRaw = fs.readFileSync(templateCSVFilePath, 'utf8');
+
+    // Parse into objects using header row for column names
+    const records = parse(csvRaw, { columns: true, skip_empty_lines: true });
+
+    // Build lookup table for ref replacements
+    const refLookup = {
+        ..._TEST_ASSET_REFS_POSITIVE,
+        ..._TEST_ASSET_REFS_NEGATIVE,
+    };
+
+    // Replace reference column values
+    records.forEach((row) => {
+        if (row.hasOwnProperty(refColName) && refLookup[row[refColName]]) {
+            row[refColName] = refLookup[row[refColName]];
+        }
+    });
+
+    // Stringify back to CSV with header row
+    const outputCsv = stringify(records, { header: true });
+
+    // Ensure output directory exists
+    fs.mkdirSync(path.dirname(outputCSVFilePath), { recursive: true });
+    fs.writeFileSync(outputCSVFilePath, outputCsv, 'utf8');
+
+    return outputCSVFilePath;
+}
+
 
 module.exports = {
     ALL_RECORDS     : TEST_INPUT,
     POSITIVE_ONLY: _TEST_INPUT_POSITIVE_CASES,
     NEGATIVE_ONLY: _TEST_INPUT_NEGATIVE_CASES,
     reduceTestRecords: reduceTestRecords,
+    fromTemplateCSVFile: fromTemplateCSVFile,
 };
