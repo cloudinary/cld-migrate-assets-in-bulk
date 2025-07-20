@@ -24,6 +24,7 @@ const _TEST_INPUT_POSITIVE = {
     test_local_asset_small_relpath  : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_small_relpath},
     test_local_asset_small_fullpath : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_small_fullpath},
     test_local_asset_large          : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_large},
+    test_http_remote_asset_large    : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_remote_large},
 }
 
 const _TEST_ASSET_REFS_NEGATIVE = {
