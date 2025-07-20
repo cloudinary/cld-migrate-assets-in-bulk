@@ -29,6 +29,7 @@
 'use strict';
 
 const path = require('path');
+const logging = require('../lib/output/logging');
 const cloudinary = require('cloudinary').v2;
 
 const PLUGIN_NAME = path.parse(__filename).name;
@@ -106,6 +107,7 @@ class CloudinaryMetadataMapper {
     async init_Async() {
         const metadataResult = await cloudinary.api.list_metadata_fields();
         this.#metadata_structure = metadataResult.metadata_fields;
+        logging.plugins.info({metadata_fields:metadataResult.metadata_fields}, `${PLUGIN_NAME}: Fetched Cloudinary metadata definitions from target product environment`);
     }
 
     /**
