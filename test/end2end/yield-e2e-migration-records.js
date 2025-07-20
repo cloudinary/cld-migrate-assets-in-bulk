@@ -10,16 +10,29 @@ const testResources = require('../resources');
 //
 // Split into positive / negative to allow referencing separately in the tests
 //
+
+const _TEST_ASSET_REFS_POSITIVE = {
+    test_asset_ref_remote_small         : 'https://res.cloudinary.com/cld-sol-demo/image/upload/sample.jpg',
+    test_asset_ref_local_small_relpath  : testResources.getAssetPathRelativeToAppRoot('sample.jpg'),
+    test_asset_ref_local_small_fullpath : testResources.getAssetFullPath('sample.jpg'),
+    test_asset_ref_local_large          : testResources.LARGE_VIDEO_FILE_FULLPATH,
+}
+
 const _TEST_INPUT_POSITIVE = {
-    test_http_remote_asset_small    : {Ref: 'https://res.cloudinary.com/cld-sol-demo/image/upload/sample.jpg'},
-    test_local_asset_small_relpath  : {Ref: testResources.getAssetPathRelativeToAppRoot('sample.jpg')},
-    test_local_asset_small_fullpath : {Ref: testResources.getAssetFullPath('sample.jpg')},
-    test_local_asset_large          : {Ref: testResources.LARGE_VIDEO_FILE_FULLPATH},
+    test_http_remote_asset_small    : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_remote_small},
+    test_local_asset_small_relpath  : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_small_relpath},
+    test_local_asset_small_fullpath : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_small_fullpath},
+    test_local_asset_large          : {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_large},
+}
+
+const _TEST_ASSET_REFS_NEGATIVE = {
+    test_asset_ref_remote_does_not_exist : 'https://res.cloudinary.com/cld-sol-demo/image/upload/this-asset-does-not-exist.png',
+    test_asset_ref_local_does_not_exist  : testResources.getAssetFullPath('this-asset-does-not-exist.jpg'),
 }
 
 const _TEST_INPUT_NEGATIVE = {
-    remote_test_asset_does_not_exist : {Ref: 'https://res.cloudinary.com/cld-sol-demo/image/upload/this-asset-does-not-exist.png'},
-    local_test_asset_does_not_exist  : {Ref: testResources.getAssetFullPath('this-asset-does-not-exist.jpg')},
+    remote_test_asset_does_not_exist : {Ref: _TEST_ASSET_REFS_NEGATIVE.test_asset_ref_remote_does_not_exist},
+    local_test_asset_does_not_exist  : {Ref: _TEST_ASSET_REFS_NEGATIVE.test_asset_ref_local_does_not_exist},
 }
 
 // Adding bulk tests
