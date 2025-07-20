@@ -1,4 +1,4 @@
-File Path or URL CSV Column Name,Asset Public_ID CSV Column Name,SMD Text CSV Column Name,SMD Num CSV Column Name,SMD Date CSV Column Name,SMD SSL CSV Column Name,SMD MSL CSV Column Name,Asset Tags CSV Column,Asset Description CSV Column,SMD Field A CSV Column Name
+File Path or URL CSV Column Name,Asset Public_ID CSV Column Name,SMD Text CSV Column Name,SMD Num CSV Column Name,SMD Date CSV Column Name,SMD SSL CSV Column Name,SMD MSL CSV Column Name,Asset Tags CSV Column,Asset Description CSV Column Name,SMD Field A CSV Column Name
 test_asset_ref_local_large,smd_mapper_positive_all_values_set,A test text value,0,2025-04-01,SSL Option A,"MSL Option A,MSL Option B","test,positive",All SMD values set,All SMD values set
 test_asset_ref_remote_large,smd_mapper_positive_empty_text_field,,42,2025-5-15,SSL Option B,"MSL Option B,MSL Option C","test,positive",All SMD values except text,All SMD values except text
 test_asset_ref_remote_small,smd_mapper_positive_empty_num_field,A test text value,,2025-06-3,SSL Option C,"MSL Option C,MSL Option D","test,positive",All SMD values except number,All SMD values except number
