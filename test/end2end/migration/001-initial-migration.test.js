@@ -12,7 +12,7 @@ const TEST_OUTPUT_FOLDER = path.join(__dirname, 'test-output');
 // produced CSV input for the test
 jest.mock('../../../__input-to-api-payload', () => {
     return {
-        input2ApiPayload: jest.fn((csvRec) => {
+        input2ApiPayload_Async: jest.fn(async (csvRec) => {
             return {
                 "payload" : {
                     file: csvRec.Ref,

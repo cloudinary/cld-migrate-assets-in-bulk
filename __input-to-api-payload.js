@@ -3,6 +3,12 @@
  * into Cloudinary Upload API payload.
  */
 
+
+// Loading plugin manager. 
+// Consult readme/plugins.md for more details
+const pluginManager = require('./lib/plugins/plugin-manager');
+
+
 /**
  * Converts a CSV record from migration input file to a Cloudinary API payload.
  * 
@@ -15,17 +21,13 @@
  *  - Define which field from the input CSV record to use for the asset URL
  *  - Define how to pass the input CSV record fields with Cloudinary Upload API as the asset's taxonomy (tags, metadata, DAM folder etc.)
  * 
+ * @async (allows to perform async operations such as pulling data from external API sources)
  * @param {Object} csvRec - CSV record from the migration input file
  * @returns {Object} - parameters for Cloudinary API call
  *  - file: the URL to obtain the asset from
  *  - options: options for the Cloudinary Upload API call
  */
-
-// Loading plugin manager. 
-// Consult ./readme/plugins.md for more details
-const pluginManager = require('./lib/plugins/plugin-manager');
-
-exports.input2ApiPayload = function(csvRec) {
+exports.input2ApiPayload_Async = async function(csvRec) {
     // Where to load the asset from 
     // Any source supported by Cloudinary Upload API: https://cloudinary.com/documentation/upload_parameters#required_file_parameter
     const file = csvRec['File_Path_or_URL_ColumnName'];
@@ -60,7 +62,7 @@ exports.input2ApiPayload = function(csvRec) {
 
     // Applying plugins and collecting their output in order they are applied
     const plugins_trace = [];
-    const smdPluginTrace = applyStructuredMetadataMapperPlugin(options, csvRec);
+    const smdPluginTrace = await applyStructuredMetadataMapperPlugin_Async(options, csvRec);
     plugins_trace.push(smdPluginTrace);
 
     // Returning the payload and the trace of the plugins applied
@@ -78,13 +80,13 @@ exports.input2ApiPayload = function(csvRec) {
  * @param {Object} csvRec - The CSV record from the migration input file
  * @returns {Object} - The trace of the plugin applied
  */
-function applyStructuredMetadataMapperPlugin(options, csvRec) {
+async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
     // Example: Using plugin to map "business" values from CSV file to external_id values for Cloudinary API
     //          Plugin fetches SMD field definitions to automatically map values (labels) from CSV file to external_id values
     //          or apply formatting for date values for the fields specified in the mapping
     const smdPluginName = 'cld-structured-metadata-mapper';
     const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin(smdPluginName);
-    const resolvedSmdValues = CloudinaryStructuredMetadataMapper.process(options, csvRec, {
+    const resolvedSmdValues = await CloudinaryStructuredMetadataMapper.process_Async(options, csvRec, {
         'Column B': 'smd_field_external_id_a', // Map values from 'Column A' CSV column to 'smd_field_external_id_a' SMD field
         'Column C': 'smd_field_external_id_b'  // Map values from 'Column B' CSV column to 'smd_field_external_id_b' SMD field
     });
