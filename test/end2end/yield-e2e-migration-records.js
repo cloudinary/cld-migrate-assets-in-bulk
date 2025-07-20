@@ -16,6 +16,7 @@ const _TEST_ASSET_REFS_POSITIVE = {
     test_asset_ref_local_small_relpath  : testResources.getAssetPathRelativeToAppRoot('sample.jpg'),
     test_asset_ref_local_small_fullpath : testResources.getAssetFullPath('sample.jpg'),
     test_asset_ref_local_large          : testResources.LARGE_VIDEO_FILE_FULLPATH,
+    test_asset_ref_remote_large         : 'https://res.cloudinary.com/cld-sol-demo/video/upload/waterfall-video-107mb.mp4',
 }
 
 const _TEST_INPUT_POSITIVE = {
@@ -40,22 +41,22 @@ const _TEST_CASE_BULK_SIZE = 100; // Number of records to generate for each test
 
 const _BULK_TEST_CASES_POSITIVE_REMOTE = new Object();
 for (let i = 0; i < _TEST_CASE_BULK_SIZE; i++) {
-    _BULK_TEST_CASES_POSITIVE_REMOTE[`test_http_remote_asset_small_${i}`] = {Ref: 'https://res.cloudinary.com/cld-sol-demo/image/upload/sample.jpg'};
+    _BULK_TEST_CASES_POSITIVE_REMOTE[`test_http_remote_asset_small_${i}`] = {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_remote_small};
 }
 
 const _BULK_TEST_CASES_POSITIVE_LOCAL = new Object();
 for (let i = 0; i < _TEST_CASE_BULK_SIZE; i++) {
-    _BULK_TEST_CASES_POSITIVE_LOCAL[`test_local_asset_small_relpath_${i}`] = {Ref: testResources.getAssetPathRelativeToAppRoot('sample.jpg')};
+    _BULK_TEST_CASES_POSITIVE_LOCAL[`test_local_asset_small_relpath_${i}`] = {Ref: _TEST_ASSET_REFS_POSITIVE.test_asset_ref_local_small_relpath};
 }
 
 const _BULK_TEST_CASES_NEGATIVE_REMOTE = new Object();
 for (let i = 0; i < _TEST_CASE_BULK_SIZE; i++) {
-    _BULK_TEST_CASES_NEGATIVE_REMOTE[`remote_test_asset_does_not_exist_${i}`] = {Ref: 'https://res.cloudinary.com/cld-sol-demo/image/upload/this-asset-does-not-exist.png'};
+    _BULK_TEST_CASES_NEGATIVE_REMOTE[`remote_test_asset_does_not_exist_${i}`] = {Ref: _TEST_ASSET_REFS_NEGATIVE.test_asset_ref_remote_does_not_exist};
 }
 
 const _BULK_TEST_CASES_NEGATIVE_LOCAL = new Object();
 for (let i = 0; i < _TEST_CASE_BULK_SIZE; i++) {
-    _BULK_TEST_CASES_NEGATIVE_LOCAL[`local_test_asset_does_not_exist_${i}`] = {Ref: testResources.getAssetFullPath('this-asset-does-not-exist.jpg')};
+    _BULK_TEST_CASES_NEGATIVE_LOCAL[`local_test_asset_does_not_exist_${i}`] = {Ref: _TEST_ASSET_REFS_NEGATIVE.test_asset_ref_local_does_not_exist};
 }
 
 const TEST_INPUT = {
