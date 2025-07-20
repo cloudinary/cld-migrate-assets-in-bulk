@@ -43,9 +43,9 @@ function runTestsFrom(testPath) {
 
         // Running end-to-end tests in order
         runTestsFrom('./test/end2end/logging/logging-e2e.test.js');
-        runTestsFrom('./test/end2end/tests/001-initial-migration.test.js');
-        runTestsFrom('./test/end2end/tests/002-overwriting-enabled.test.js');
-        runTestsFrom('./test/end2end/tests/003-overwriting-disabled.test.js');
+        runTestsFrom('./test/end2end/migration/001-initial-migration.test.js');
+        runTestsFrom('./test/end2end/migration/002-overwriting-enabled.test.js');
+        runTestsFrom('./test/end2end/migration/003-overwriting-disabled.test.js');
     } catch (error) {
         console.error('Error running tests:', error);
     } finally {
