@@ -82,8 +82,10 @@ exports.input2ApiPayload_Async = async function(csvRec) {
  */
 async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
     // Example: Using plugin to map "business" values from CSV file to external_id values for Cloudinary API
-    //          Plugin fetches SMD field definitions to automatically map values (labels) from CSV file to external_id values
-    //          or apply formatting for date values for the fields specified in the mapping
+    //          Plugin fetches SMD field definitions to automatically 
+    //          - map values (labels) from CSV file to the matching external_id values
+    //          - apply supported formatting for the date values (e.g. YYYY-MM-DD)
+    //          - ... etc (consult the plugin implementation for details)
     const smdPluginName = 'cld-structured-metadata-mapper';
     const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin(smdPluginName);
     const resolvedSmdValues = await CloudinaryStructuredMetadataMapper.process_Async(options, csvRec, {
