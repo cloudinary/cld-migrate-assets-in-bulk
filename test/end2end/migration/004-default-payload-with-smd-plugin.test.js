@@ -7,7 +7,7 @@
  *       + Mimics CSV structure assumed by the default imput2ApiPayload_Async
  *       + Contains additional columns to represent expected end state of SMD values
  *   - Used to produce input CSV file (by replacing "asset_ref" entries with actual URLs / paths )
- *   - Then the input CSV file is used to produce test scenarios
+ *   - Also used to produce test scenarios
  *       + Additional columns are used when constructing test scenarios
  *   - Test scenarios are validated against the log file records as test cases
  */
@@ -174,6 +174,10 @@ let __TEST_REPORT = null;
 // Test scenarios to be calculated from the input CSV file
 let __TEST_SCENARIOS = [];
 
+// Calculate test scenarios from template CSV file (available at test discovery time)
+const TEMPLATE_CSV_FILE = path.join(__dirname, '004-default-payload-with-smd-plugin.template.csv');
+__TEST_SCENARIOS = calculateTestScenariosFromInputCSVFile(TEMPLATE_CSV_FILE);
+
 /**
  * Calculates test scenarios from the input CSV file by parsing each record
  * and creating scenario objects that define expected outcomes for migration testing.
@@ -216,6 +220,17 @@ function calculateTestScenariosFromInputCSVFile(inputCSVFile) {
                     scenario.expected_smd_values[smdFieldId] = record[csvColumn];
                 }
             }
+
+            // Correctly parse numeric values
+            if (scenario.expected_smd_values['smd_num_field_external_id']) {
+                scenario.expected_smd_values['smd_num_field_external_id'] = parseInt(scenario.expected_smd_values['smd_num_field_external_id']);
+            }
+
+            // Correctly parse multi-select values
+            if (scenario.expected_smd_values['smd_msl_field_external_id']) {
+                scenario.expected_smd_values['smd_msl_field_external_id'] = scenario.expected_smd_values['smd_msl_field_external_id'].split(',');
+            }
+
         }
         
         return scenario;
@@ -235,9 +250,6 @@ describe('Default payload with SMD plugin', () => {
             'File Path or URL CSV Column Name',
             INPUT_CSV_FILE
         );
-
-        console.log('Calculating test scenarios from produced input CSV file...');
-        __TEST_SCENARIOS = calculateTestScenariosFromInputCSVFile(INPUT_CSV_FILE);
 
         console.log('Creating SMD Definitions...');
         for (const smd_field_definition of SMD_DEFINITIONS) {
@@ -268,7 +280,19 @@ describe('Default payload with SMD plugin', () => {
         await cleanup();
     });
 
-    it('Dummy test', async() => {
-        expect(true).toBe(true);
+    test.each(__TEST_SCENARIOS)('$public_id - migration log record should match test scenario', (scenario) => {
+        // Ensure there is a single log record for the public_id tested
+        const logRecList = __TEST_LOG.getEntriesByPublicId(scenario.public_id);
+        expect(logRecList.length).toBe(1);
+        const migrationLogRecord = logRecList[0];
+        expect(migrationLogRecord).toBeDefined();
+
+        if (scenario.expected_to_succeed) {
+            expect(migrationLogRecord.summary.status).toBe("MIGRATED");
+            expect(migrationLogRecord.response.metadata).toStrictEqual(scenario.expected_smd_values);
+        } else {
+            expect(migrationLogRecord.summary.status).toBe("FAILED");
+        }
     });
+
 });
