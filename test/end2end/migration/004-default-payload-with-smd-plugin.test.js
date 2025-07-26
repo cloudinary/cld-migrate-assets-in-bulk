@@ -162,10 +162,10 @@ const SMD_DEFINITIONS = [
   ]
 
 async function cleanup() {
-    /*await testAppFlow.testCleanup_Async({
+    await testAppFlow.testCleanup_Async({
         input_csv_file: INPUT_CSV_FILE,
         test_output_folder: TEST_OUTPUT_FOLDER,
-    });*/
+    });
 }
 
 // Variables to reference records from the parsed migration log and report files
