@@ -178,6 +178,9 @@ let __TEST_SCENARIOS = [];
 const TEMPLATE_CSV_FILE = path.join(__dirname, '004-default-payload-with-smd-plugin.template.csv');
 __TEST_SCENARIOS = calculateTestScenariosFromInputCSVFile(TEMPLATE_CSV_FILE);
 
+let __TEST_SCENARIOS_MIGRATED = __TEST_SCENARIOS.filter(scenario => scenario.expected_to_succeed);
+let __TEST_SCENARIOS_FAILED = __TEST_SCENARIOS.filter(scenario => !scenario.expected_to_succeed);
+
 /**
  * Calculates test scenarios from the input CSV file by parsing each record
  * and creating scenario objects that define expected outcomes for migration testing.
@@ -193,15 +196,18 @@ function calculateTestScenariosFromInputCSVFile(inputCSVFile) {
     const records = parse(csvContent, { columns: true, skip_empty_lines: true });
     
     return records.map(record => {
-        const expected_to_succeed = record['Expected To Succeed'] === 'TRUE';
+        const expected_to_succeed = record['Expect To Succeed'] === 'TRUE';
         
         const scenario = {
             public_id: record['Asset Public_ID CSV Column Name'],
             expected_to_succeed: expected_to_succeed,
+            expect_err_message_to_start_with: null,
             expected_smd_values: null
         };
         
-        if (expected_to_succeed) {
+        if (!expected_to_succeed) {
+            scenario.expect_err_message_to_start_with = record['Expect Error Message To Start With'];
+        } else {  // Expected to succeed
             scenario.expected_smd_values = {};
             
             // Map CSV columns to SMD field external IDs
@@ -280,19 +286,29 @@ describe('Default payload with SMD plugin', () => {
         await cleanup();
     });
 
-    test.each(__TEST_SCENARIOS)('$public_id - migration log record should match test scenario', (scenario) => {
+    test.each(__TEST_SCENARIOS_MIGRATED)('$public_id - expected to succeed migration', (scenario) => {
         // Ensure there is a single log record for the public_id tested
         const logRecList = __TEST_LOG.getEntriesByPublicId(scenario.public_id);
         expect(logRecList.length).toBe(1);
         const migrationLogRecord = logRecList[0];
         expect(migrationLogRecord).toBeDefined();
+        expect(migrationLogRecord.summary.status).toBe("MIGRATED");
+        expect(migrationLogRecord.response.metadata).toStrictEqual(scenario.expected_smd_values);
+    });
 
-        if (scenario.expected_to_succeed) {
-            expect(migrationLogRecord.summary.status).toBe("MIGRATED");
-            expect(migrationLogRecord.response.metadata).toStrictEqual(scenario.expected_smd_values);
-        } else {
-            expect(migrationLogRecord.summary.status).toBe("FAILED");
-        }
+    test.each(__TEST_SCENARIOS_FAILED)('$public_id - expected to fail migration', (scenario) => {
+        // Ensure there is a single log record for the public_id tested
+        const logRecList = __TEST_LOG.getAll().filter(
+            logRec =>
+                logRec.flow === 'payload' &&
+                logRec.input['Asset Public_ID CSV Column Name'] === scenario.public_id
+        );
+        expect(logRecList.length).toBe(1);
+        const migrationLogRecord = logRecList[0];
+        expect(migrationLogRecord.summary.status).toBe("FAILED");
+        console.log(migrationLogRecord.summary.err.message);
+        console.log(scenario.expect_err_message_to_start_with);
+        expect(migrationLogRecord.summary.err.message.startsWith(scenario.expect_err_message_to_start_with)).toBe(true);
     });
 
 });
