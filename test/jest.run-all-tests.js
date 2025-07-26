@@ -46,6 +46,7 @@ function runTestsFrom(testPath) {
         runTestsFrom('./test/end2end/migration/001-initial-migration.test.js');
         runTestsFrom('./test/end2end/migration/002-overwriting-enabled.test.js');
         runTestsFrom('./test/end2end/migration/003-overwriting-disabled.test.js');
+        runTestsFrom('./test/end2end/migration/004-default-payload-with-smd-plugin.test.js');
     } catch (error) {
         console.error('Error running tests:', error);
     } finally {
