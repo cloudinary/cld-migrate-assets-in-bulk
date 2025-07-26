@@ -1,11 +1,22 @@
 /**
  * Test for default implementation of the input2ApiPayload_Async function
  * that uses the structured metadata mapper plugin
+ * 
+ * Logic of the test:
+ *   - Template CSV (can be edited externally in spreadsheet software to simplify maintenance)
+ *       + Mimics CSV structure assumed by the default imput2ApiPayload_Async
+ *       + Contains additional columns to represent expected end state of SMD values
+ *   - Used to produce input CSV file (by replacing "asset_ref" entries with actual URLs / paths )
+ *   - Then the input CSV file is used to produce test scenarios
+ *       + Additional columns are used when constructing test scenarios
+ *   - Test scenarios are validated against the log file records as test cases
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+
+const { parse } = require('csv-parse/sync');
 
 const cloudinary = require('cloudinary').v2;
 
@@ -160,6 +171,57 @@ async function cleanup() {
 // Variables to reference records from the parsed migration log and report files
 let __TEST_LOG = null;
 let __TEST_REPORT = null;
+// Test scenarios to be calculated from the input CSV file
+let __TEST_SCENARIOS = [];
+
+/**
+ * Calculates test scenarios from the input CSV file by parsing each record
+ * and creating scenario objects that define expected outcomes for migration testing.
+ * 
+ * Each test scenario represents a single asset migration case with expected
+ * success/failure status and structured metadata values to validate against.
+ * 
+ * @param {string} inputCSVFile - Path to the input CSV file containing test data
+ * @returns {Array} Array of test scenario objects with public_id, expected_to_succeed, and expected_smd_values
+ */
+function calculateTestScenariosFromInputCSVFile(inputCSVFile) {    
+    const csvContent = fs.readFileSync(inputCSVFile, 'utf8');
+    const records = parse(csvContent, { columns: true, skip_empty_lines: true });
+    
+    return records.map(record => {
+        const expected_to_succeed = record['Expected To Succeed'] === 'TRUE';
+        
+        const scenario = {
+            public_id: record['Asset Public_ID CSV Column Name'],
+            expected_to_succeed: expected_to_succeed,
+            expected_smd_values: null
+        };
+        
+        if (expected_to_succeed) {
+            scenario.expected_smd_values = {};
+            
+            // Map CSV columns to SMD field external IDs
+            const smdMappings = {
+                'SMD Text CSV Column Name': 'smd_text_field_external_id',
+                'SMD Num CSV Column Name': 'smd_num_field_external_id',
+                'SMD Date Expected Value': 'smd_date_field_external_id',
+                'SMD SSL Expected Value': 'smd_ssl_field_external_id',
+                'SMD MSL Expected Value': 'smd_msl_field_external_id',
+                'SMD Field A CSV Column Name': 'smd_field_external_id_a'
+            };
+            
+            // Only add properties that have values
+            for (const [csvColumn, smdFieldId] of Object.entries(smdMappings)) {
+                if (record[csvColumn]) {
+                    scenario.expected_smd_values[smdFieldId] = record[csvColumn];
+                }
+            }
+        }
+        
+        return scenario;
+    });
+}
+
 
 describe('Default payload with SMD plugin', () => {
     beforeAll(async () => {
@@ -173,6 +235,9 @@ describe('Default payload with SMD plugin', () => {
             'File Path or URL CSV Column Name',
             INPUT_CSV_FILE
         );
+
+        console.log('Calculating test scenarios from produced input CSV file...');
+        __TEST_SCENARIOS = calculateTestScenariosFromInputCSVFile(INPUT_CSV_FILE);
 
         console.log('Creating SMD Definitions...');
         for (const smd_field_definition of SMD_DEFINITIONS) {
