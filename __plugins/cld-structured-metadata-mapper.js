@@ -184,9 +184,10 @@ class CloudinaryMetadataMapper {
             try {
                 metadata[externalId] = this.#processMetadataValue(schema, value);
                 processedEntries.push({
-                    csv_column_name      : csvColumn,
-                    resolved_external_id : externalId,
-                    resolved_values      : metadata[externalId]
+                    input_csv_column_name : csvColumn,
+                    input_value           : input_fields[csvColumn],
+                    resolved_external_id  : externalId,
+                    resolved_values       : metadata[externalId]
                 });
             } catch (error) {
                 if (error instanceof InvalidDataSourceOptionError) {
