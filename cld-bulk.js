@@ -69,7 +69,6 @@ function configureCommands(program) {
         .showHelpAfterError()
         .allowUnknownOption(false)
         .action(async (cliArgs, cliCommand) => {
-            console.log('migrate payload');
             await mainLoop.loopOverCsvInput_Async(
                 cliArgs,
                 cliCommand,
