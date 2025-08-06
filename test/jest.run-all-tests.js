@@ -9,6 +9,9 @@ const testEnv = require('./end2end/test-env');
 const resources = require('./resources');
 const { run } = require('jest');
 
+// Check if --dev flag is present
+const TEST_DEV = process.argv.some(arg => arg.toLowerCase() === '--dev');
+
 // Setup and teardown
 async function runGlobalSetup_Async() {
     console.log('\nGLOBAL SETUP: START');
@@ -46,7 +49,12 @@ function runTestsFrom(testPath) {
         runTestsFrom('./test/end2end/migration/001-initial-migration.test.js');
         runTestsFrom('./test/end2end/migration/002-overwriting-enabled.test.js');
         runTestsFrom('./test/end2end/migration/003-overwriting-disabled.test.js');
-        runTestsFrom('./test/end2end/migration/004-default-payload-with-smd-plugin.test.js');
+
+        if (TEST_DEV) {
+            // Only run default payload test in dev mode
+            // It will not match test setup when modified (intended to be modified for a migration project)
+            runTestsFrom('./test/end2end/migration/004-default-payload-with-smd-plugin.test.js');
+        }
     } catch (error) {
         console.error('Error running tests:', error);
     } finally {
