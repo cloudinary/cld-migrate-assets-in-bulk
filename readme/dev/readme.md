@@ -14,6 +14,11 @@ Custom configuration is used - see the `scripts.test` in `package.json`.
 
 Test modules are maintained under the `test` folder.
 
+## Customizations
+
+### Confirmation Prompt
+
+If you need to run the tool in scenarios when the confirmation user prompt becomes a blocker - you may find [modification suggested in this pull request](https://github.com/cloudinary/cld-migrate-assets-in-bulk/pull/13) to be of help.
 
 ## End2End Tests
 End to end tests require to be executed in certain order (see the `test/jest.run-all-tests.js` file).
