@@ -20,7 +20,7 @@ This script provides the following features:
 - Migration report (CSV) produced from the migration log file
 
 # What it is NOT
-❗ This script is not a one-size-fits-all solution for migrating to Cloudinary. It serves as a foundational tool for IT and software engineers who need to migrate large volumes of assets when other options are impractical or unavailable.
+❗ This is NOT a one-size-fits-all solution for migrating to Cloudinary. It serves as a foundational tool for IT and software engineers who need to migrate large volumes of assets when other options are impractical or unavailable.
 
 # How to Use It
 Follow these steps to successfully migrate your assets:

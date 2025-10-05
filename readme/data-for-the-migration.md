@@ -18,8 +18,3 @@ The CSV file you create will serve as the input for the migration script. Before
 - When building CSV input file and referencing assets via URLs or file paths:
     - Make sure to reference the assets in the largest available dimensions (to allow for highest quality transformations).
     - Make sure the referenced assets have had the least aggressive compression algorithms applied prior to being migrated (to avoid visual artifacts).
-
-## Use External IDs for Structured Metadata 🛠️
-
-- Translate [Cloudinary's structured metadata values for single- and multi-select fields](https://cloudinary.com/documentation/dam_admin_structured_metadata#external_id) to external IDs.
-    - This translation can be done either in the tool you use to generate the CSV file or by adding custom logic to the [__input-to-api-payload.js](../__input-to-api-payload.js) module.

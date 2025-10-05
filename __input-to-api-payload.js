@@ -48,7 +48,7 @@ exports.input2ApiPayload_Async = async function(csvRec) {
         tags:            csvRec['Asset Tags CSV Column Name'],      // Pass value to be set as tags on the uploaded asset (addressed by column name from the input CSV file)
 
 
-        timeout: SDK_NETWORK_TIMEOUT_MS,                            // See `timeout` parameter in Upload API docs: https://cloudinary.com/documentation/image_upload_api_reference
+        timeout: SDK_NETWORK_TIMEOUT_MS,                            // See `timeout` parameter in Upload API docs: https://cloudinary.com/documentation/image_upload_api_reference#upload
 
 
         // Example: Assigning contextual metadata
@@ -74,7 +74,7 @@ exports.input2ApiPayload_Async = async function(csvRec) {
     const smdPluginTrace = await applyStructuredMetadataMapperPlugin_Async(options, csvRec);
     plugins_trace.push(smdPluginTrace);
 
-    // Returning the payload and the trace of the plugins applied
+    // Returning the payload and the trace of the plugins applied. They will also be included in the migration log.
     return {
         "payload"       : { file, options }, // Payload for Cloudinary API call
         "plugins_trace" : plugins_trace      // Output produced by plugins to include in the log. Return empty object if no plugins are used.
@@ -96,8 +96,8 @@ async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
     //          - apply supported formatting for the date values (e.g. YYYY-MM-DD)
     //          - ... etc (consult the plugin implementation for details)
     const smdPluginName = 'cld-structured-metadata-mapper';
-    const  CloudinaryStructuredMetadataMapper = pluginManager.getPlugin(smdPluginName);
-    const resolvedSmdValues = await CloudinaryStructuredMetadataMapper.process_Async(options, csvRec, {
+    const CloudinaryStructuredMetadataMapper = pluginManager.getPlugin(smdPluginName);
+    const smdMappingTrace = await CloudinaryStructuredMetadataMapper.process_Async(options, csvRec, {
         mapping : {
             'SMD Text CSV Column Name': 'smd_text_field_external_id', // Map text values from CSV file to 'smd_text_field_external_id' SMD field
             'SMD Num CSV Column Name' : 'smd_num_field_external_id',  // Map numeric values from CSV file to 'smd_num_field_external_id' SMD field
@@ -108,5 +108,5 @@ async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
     });
 
     // Storing output of the plugin to include in the combined log record
-    return { name: smdPluginName, trace: resolvedSmdValues };
+    return { name: smdPluginName, trace: smdMappingTrace };
 }

@@ -11,7 +11,7 @@ To avoid accidental overwrites, the script will terminate if directed to an exis
 - `round2-recovery` for a second attempt focusing on assets that failed during the initial run
 - ...and so on.
 
-Also, you'll need to specify the number of concurrent Cloudinary Upload API invocations the script should make. To minimize the risk of receiving `420` status codes, we recommend setting this value to `10`.
+Also, you'll need to specify the number of concurrent Cloudinary Upload API invocations the script should make. To minimize the risk of receiving `420` status codes, we recommend setting this value to `20`.
 
 # Running over SSH
 
@@ -30,7 +30,7 @@ screen -S "cld_migration"
 node ./cld-bulk.js migrate \
     --from-csv-file /path/to/input/file.csv \
     --output-folder /path/to/output/folder/for/this/migration/round \
-    --max-concurrent-uploads 10
+    --max-concurrent-uploads 20
 ```
 
 # Monitoring for errors

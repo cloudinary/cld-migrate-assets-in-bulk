@@ -9,22 +9,26 @@ This application supports an **opt-in plugin mechanism** that lets you inject cu
 
 The mechanism is intentionally simple: every plugin is just a JavaScript module that exports a `plugin` object implementing two well-defined asynchronous hooks.
 
----
+Use the [cld-structured-metadata-mapper](../__plugins/cld-structured-metadata-mapper.js) implementation as a reference / starter.
+
 ## Concept
 1. **Discovery & loading**  
-   At startup the main loop resolves the folder `__plugins/` and asks the *Plugin Manager* (`lib/plugins/plugin-manager.js`) to load everything that:
+   At startup the application resolves the folder `__plugins/` and asks the *Plugin Manager* (`lib/plugins/plugin-manager.js`) to load everything that:
    * is a `.js` file **not** ending with `.test.js`  
    * exports `plugin.init_Async()` **and** `plugin.process_Async()`
 
-   Each module is loaded **once** and its `init_Async()` method is awaited.  Any error aborts the whole startup – so the plugin must fail fast if configuration is not valid.
+   Each module is loaded **once** and its `init_Async()` method is awaited (for example, to make API call to load necessary definitions)
 
 2. **Runtime execution**  
-   For every CSV record the application builds an Upload API payload (see `__input-to-api-payload.js`). Inside that module individual plugins are obtained via `pluginManager.getPlugin(name)` and their `process_Async()` method is awaited.  The method receives **references** to the objects it should enrich – that means a plugin can modify them in-place.
+   Modules are intended to be invoked from the [__input-to-api-payload.js module](../__input-to-api-payload.js)
+   * Initialized plugin instance is obtained via `pluginManager.getPlugin(name)` where `name` is the plugin file name with no extension 
+   * The `process_Async()` method of the plugin instance is invoked by you according to the implementation requirements
+      + The method is intended to be used as part of "pipeline" (when multiple plugins are used) 
+      + It receives **reference** to Cloudinary upload options object to apply changes according to your logic
 
 3. **Logging**  
-   It is a good practice to have `process_Async()` method of a plugin produce some sort of a "trace record" and persist the record in `plugins_trace` (see `__input-to-api-payload.js`). This approach retains plugin's "trace" in the context of the migration record simplifying troubleshooting of an individual operation.
+   It is a good practice to have `process_Async()` method of a plugin produce some sort of a "trace record" and persist the record in `plugins_trace`. This approach retains plugin's "trace" as part of a single migration record for each asset simplifying troubleshooting of an individual operation.
 
----
 ## Implementation
 Below is everything you need to author a new plugin.
 
@@ -47,8 +51,7 @@ module.exports.plugin = {
   }
 };
 ```
-*   Both functions **must** return a `Promise` (use `async` or explicit `Promise.resolve()`)
-*   Keep `process_Async` **idempotent** and **side-effect-free** outside of the supplied objects – it will be executed many thousands of times.
+*   Keep `process_Async` **idempotent** and **side-effect-free** outside of the supplied objects – it will be executed for each migrated asset (potentially, many thousands of times).
 
 ### 3. Use the plugin from the payload module
 ```js
@@ -57,20 +60,10 @@ const pluginManager = require('./lib/plugins/plugin-manager');
 const myPlugin = pluginManager.getPlugin('my-awesome-plugin');
 const trace = await myPlugin.process_Async(options, csvRec, {/* custom opts */});
 ```
-Whatever you return will be stored in the migration log and eventually surface in the final report.
+Whatever you return will be stored in the migration log for troubleshooting purposes.
 
 ### 4. Handle errors deliberately
-Throwing inside `process_Async` marks the current record as **FAILED** and logs the error.  Prefer custom error classes so they can be recognised in the calling code (see `cld-structured-metadata-mapper.js` for an example).
+Throwing inside `process_Async` marks the current record as **FAILED** and logs the error.  Prefer custom error classes so they can be recognised in the calling code.
 
 ### 5. Test it
-Plugins live in the same repository, so you can write unit tests under any `*.test.js` name – the Plugin Manager automatically skips them.
-
----
-### Reference example
-`__plugins/cld-structured-metadata-mapper.js` demonstrates a fully-fledged plugin that:
-* boots by fetching structured-metadata definitions via the Cloudinary API
-* validates user-provided mapping configuration
-* translates labels to `external_id`s for single- and multi-select fields
-* returns a trace that ends up in the migration log
-
-Use it as a template when building your own plugin.
+You can write unit tests under `*.test.js` name – the Plugin Manager automatically skips them.
