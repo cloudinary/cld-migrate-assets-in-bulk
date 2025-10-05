@@ -306,8 +306,6 @@ describe('Default payload with SMD plugin', () => {
         expect(logRecList.length).toBe(1);
         const migrationLogRecord = logRecList[0];
         expect(migrationLogRecord.summary.status).toBe("FAILED");
-        console.log(migrationLogRecord.summary.err.message);
-        console.log(scenario.expect_err_message_to_start_with);
         expect(migrationLogRecord.summary.err.message.startsWith(scenario.expect_err_message_to_start_with)).toBe(true);
     });
 
