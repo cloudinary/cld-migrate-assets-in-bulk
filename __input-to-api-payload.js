@@ -9,6 +9,12 @@
 const pluginManager = require('./lib/plugins/plugin-manager');
 
 
+// Timeout for the network operations performed by the Cloudinary SDK. (Think "how long do I wait for Upload API response?")
+// Applied via the `timeout` parameter in upload options (see the input2ApiPayload_Async implementation)
+// Intended to prevent false positive "Request Timeout" errors for migrated assets.
+// You can set it to a higher value (for example when migrating large files that take longer to process on upload) 
+const SDK_NETWORK_TIMEOUT_MS = 5 * 60 * 1000;
+
 /**
  * Converts a CSV record from migration input file to a Cloudinary API payload.
  * 
@@ -40,6 +46,9 @@ exports.input2ApiPayload_Async = async function(csvRec) {
         overwrite:       false,                                     // Do not overwrite the asset with same public_id if it already exists (good idea if migrating to an account with existing assets)
         type:            'upload',                                  // Explicitly set delivery type
         tags:            csvRec['Asset Tags CSV Column Name'],      // Pass value to be set as tags on the uploaded asset (addressed by column name from the input CSV file)
+
+
+        timeout: SDK_NETWORK_TIMEOUT_MS,                            // See `timeout` parameter in Upload API docs: https://cloudinary.com/documentation/image_upload_api_reference
 
 
         // Example: Assigning contextual metadata
