@@ -33,11 +33,11 @@ Use the [cld-structured-metadata-mapper](../__plugins/cld-structured-metadata-ma
 Below is everything you need to author a new plugin.
 
 ### 1. Create a file in `__plugins/`
-File name becomes the plugin’s **identifier** (e.g. `my-awesome-plugin.js` ➝ `my-awesome-plugin`).
+File name becomes the plugin’s **identifier** (e.g. `my-plugin.js` ➝ `my-plugin`).
 
 ### 2. Export the mandatory hooks
 ```js
-// __plugins/my-awesome-plugin.js
+// __plugins/my-plugin.js
 module.exports.plugin = {
   /** One-time boot-strap – e.g. fetch schemas, set up caches */
   async init_Async () {
@@ -51,16 +51,23 @@ module.exports.plugin = {
   }
 };
 ```
-*   Keep `process_Async` **idempotent** and **side-effect-free** outside of the supplied objects – it will be executed for each migrated asset (potentially, many thousands of times).
+
+Keep `process_Async` side-effect-free outside of the supplied objects – it will be executed for each migrated asset (potentially, many thousands of times).
 
 ### 3. Use the plugin from the payload module
 ```js
 const pluginManager = require('./lib/plugins/plugin-manager');
 ...
-const myPlugin = pluginManager.getPlugin('my-awesome-plugin');
+const myPlugin = pluginManager.getPlugin('my-plugin');
 const trace = await myPlugin.process_Async(options, csvRec, {/* custom opts */});
+...
+// Returning the payload and the trace of the plugins applied. They will also be included in the migration log.
+return {
+    "payload"       : { file, options }, 
+    "plugins_trace" : { 'my-plugin': trace }      
+};
 ```
-Whatever you return will be stored in the migration log for troubleshooting purposes.
+Whatever you return can be passed via `plugins_trace` property to be included into a single log record for the current operation.
 
 ### 4. Handle errors deliberately
 Throwing inside `process_Async` marks the current record as **FAILED** and logs the error.  Prefer custom error classes so they can be recognised in the calling code.
