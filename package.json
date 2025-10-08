@@ -23,5 +23,5 @@
     "test": "node ./test/jest.run-all-tests.js",
     "test-dev": "node ./test/jest.run-all-tests.js --dev"
   },
-  "version": "2.1.2"
+  "version": "3.0.0"
 }
