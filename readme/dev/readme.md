@@ -20,6 +20,12 @@ Test modules are maintained under the `test` folder.
 
 If you need to run the tool in scenarios when the confirmation user prompt becomes a blocker - you may find [modification suggested in this pull request](https://github.com/cloudinary/cld-migrate-assets-in-bulk/pull/13) to be of help.
 
+### Plugins
+
+You can execute custom logic as part of the migration loop when calculating parameters for each migration operation.
+
+The concept is explained in more details [here](../plugins.md).
+
 ## End2End Tests
 End to end tests require to be executed in certain order (see the `test/jest.run-all-tests.js` file).
 
