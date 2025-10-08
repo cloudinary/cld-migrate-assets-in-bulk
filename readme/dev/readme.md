@@ -14,13 +14,6 @@ Custom configuration is used - see the `scripts.test` in `package.json`.
 
 Test modules are maintained under the `test` folder.
 
-### Dev Tests
-The [__input-to-api-payload.js](../../__input-to-api-payload.js) module is intended to be customized when the tool is used.
-
-BUT if you are modifying core implementation (while keeping default `__input-to-api-payload.js`) - you can use `npm run test-dev`. This runs additional test as part of end-to-end tests (with synthetic data file that matches identifiers from the default module implementation) allowing to identify potential issues that impact functionality of the tool.
-
-This test is intentionally excluded from `npm test` as it is guaranteed to fail once `__input-to-api-payload.js` implementation changes.
-
 ## Customizations
 
 ### Confirmation Prompt
