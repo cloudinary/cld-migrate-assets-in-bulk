@@ -27,7 +27,12 @@ Use the [cld-structured-metadata-mapper](../__plugins/cld-structured-metadata-ma
       + It receives **reference** to Cloudinary upload options object to apply changes according to your logic
 
 3. **Logging**  
-   It is a good practice to have `process_Async()` method of a plugin produce some sort of a "trace record" and persist the record in `plugins_trace`. This approach retains plugin's "trace" as part of a single migration record for each asset simplifying troubleshooting of an individual operation.
+   * The `init_Async` method receives an instance of a logger
+      + This logger is ONLY intended to be used on plugin initialization
+      + If you use this logger in the `process_Async` - you'll have to "stitch" contest from different log records 
+
+   * To simplify troubleshooting, have the `process_Async()` method of a plugin produce some sort of a "trace record"
+      + When persisted to `plugins_trace` (in the [__input-to-api-payload.js](../__input-to-api-payload.js) module), this approach retains plugin's "trace" as part of a single migration record for each asset simplifying troubleshooting of each individual operation
 
 ## Implementation
 Below is everything you need to author a new plugin.
@@ -40,8 +45,9 @@ File name becomes the plugin’s **identifier** (e.g. `my-plugin.js` ➝ `my-plu
 // __plugins/my-plugin.js
 module.exports.plugin = {
   /** One-time boot-strap – e.g. fetch schemas, set up caches */
-  async init_Async () {
-    // throw if something is mis-configured
+  async init_Async (log) {
+    // use provided per-plugin logger; throw if something is mis-configured
+    log.info('my-plugin initialized');
   },
 
   /** Called once per CSV record */
