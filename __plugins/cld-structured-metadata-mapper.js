@@ -102,12 +102,13 @@ class CloudinaryMetadataMapper {
     /**
      * Initializes the mapper by fetching metadata field definitions from Cloudinary
      * @async
+     * @param {Object} initLog - Logger instance. Only intended to be used in the init method.
      * @throws {Error} If Cloudinary API call fails
      */
-    async init_Async() {
+    async init_Async(initLog) {
         const metadataResult = await cloudinary.api.list_metadata_fields();
         this.#metadata_structure = metadataResult.metadata_fields;
-        logging.plugins.info({metadata_fields:metadataResult.metadata_fields}, `${PLUGIN_NAME}: Fetched Cloudinary metadata definitions from target product environment`);
+        initLog.info({metadata_fields:metadataResult.metadata_fields}, `Fetched Cloudinary metadata definitions from target product environment`);
     }
 
     /**
