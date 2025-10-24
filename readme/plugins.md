@@ -45,15 +45,16 @@ File name becomes the plugin’s **identifier** (e.g. `my-plugin.js` ➝ `my-plu
 // __plugins/my-plugin.js
 module.exports.plugin = {
   /** One-time boot-strap – e.g. fetch schemas, set up caches */
-  async init_Async (log) {
-    // use provided per-plugin logger; throw if something is mis-configured
-    log.info('my-plugin initialized');
+  async init_Async (initLog) {
+    // raise an exception to indicate failure to init
+    // use provided logger to provide additional info to the application log
+    initLog.info({additional : {info: 'you need to log'}}, 'successfully initialized');
   },
 
   /** Called once per CSV record */
   async process_Async (upload_options, csv_record, options) {
     // mutate upload_options, read from csv_record, use options provided by caller
-    return { /* anything useful to be written to the log */ };
+    return { /* anything useful to be written to the log as part of consolidated migration record */ };
   }
 };
 ```
