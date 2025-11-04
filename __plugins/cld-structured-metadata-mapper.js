@@ -173,6 +173,10 @@ class CloudinaryMetadataMapper {
             throw new InvalidSeparatorError('Separator must be a string');
         }
 
+        if (separator.length === 0) {
+            throw new InvalidSeparatorError('Separator must not be an empty string');
+        }
+
         if (separator.length > 1) {
             throw new InvalidSeparatorError('Separator must be a single character');
         }
