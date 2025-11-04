@@ -44,6 +44,9 @@ function runTestsFrom(testPath) {
         // under the 'lib' folder
         runTestsFrom('./lib/');
 
+        // Running tests for plugins
+        runTestsFrom('./__plugins/');
+
         // Running end-to-end tests in order
         runTestsFrom('./test/end2end/logging/logging-e2e.test.js');
         runTestsFrom('./test/end2end/migration/001-initial-migration.test.js');
