@@ -207,7 +207,7 @@ class CloudinaryMetadataMapper {
 
         this.#validateMapping(options.mapping, input_fields);
 
-        const separator = this.#resolveSeparator(options.separator);
+        const separator = this.#resolveSeparator(options.separator);  // Undefined if not explicitly provided
 
         const metadata = { ...upload_options.metadata };
 
