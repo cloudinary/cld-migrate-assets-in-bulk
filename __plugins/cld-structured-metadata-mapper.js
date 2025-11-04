@@ -165,7 +165,7 @@ class CloudinaryMetadataMapper {
      * @throws {InvalidSeparatorError} If separator is not a string or is longer than 1 character
      */
     #resolveSeparator(separator) {
-        if (!separator) {
+        if (separator === null || separator === undefined) {
             return ',';
         }
 
@@ -180,7 +180,7 @@ class CloudinaryMetadataMapper {
         if (separator.length > 1) {
             throw new InvalidSeparatorError('Separator must be a single character');
         }
-
+        
         return separator;
     }
 
