@@ -92,6 +92,16 @@ class FailedToProcessMetadataValueError extends Error {
 }
 
 /**
+ * Custom error for invalid separator option
+ */
+class InvalidSeparatorError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = `${PLUGIN_NAME}:InvalidSeparatorError`;
+    }
+}
+
+/**
  * Class for mapping and transforming metadata fields for Cloudinary uploads.
  * Handles different field types and ensures proper formatting of metadata values.
  */
@@ -148,6 +158,29 @@ class CloudinaryMetadataMapper {
     }
 
     /**
+     * Validates and resolves the separator value
+     * @private
+     * @param {any} separator - Separator value to validate and resolve
+     * @returns {string} Validated separator value (defaults to ',' if null/undefined)
+     * @throws {InvalidSeparatorError} If separator is not a string or is longer than 1 character
+     */
+    #resolveSeparator(separator) {
+        if (!separator) {
+            return ',';
+        }
+
+        if (typeof separator !== 'string') {
+            throw new InvalidSeparatorError('Separator must be a string');
+        }
+
+        if (separator.length > 1) {
+            throw new InvalidSeparatorError('Separator must be a single character');
+        }
+
+        return separator;
+    }
+
+    /**
      * Asynchronously processes SMD field values according to the mapping provided in options.mapping.
      * 
      * Side effect: updates `upload_options.metadata` with the processed metadata values.
@@ -157,9 +190,11 @@ class CloudinaryMetadataMapper {
      * @param {Object} input_fields - Fields to be processed
      * @param {Object} options - Processing options
      * @param {Object} options.mapping - Mapping from CSV column names to external IDs
+     * @param {Object} options.separator - Separator to use for multi-select field values (default: ',')
      * 
      * @throws {NotInitializedError} If init_Async() hasn't been called
      * @throws {InvalidMappingError} If mapping configuration is invalid
+     * @throws {InvalidSeparatorError} If provided separator value is invalid
      * @throws {InvalidDataSourceOptionError} If a value is not found in the datasource
      * @throws {FailedToProcessMetadataValueError} If a value fails to be processed
      * 
@@ -172,6 +207,8 @@ class CloudinaryMetadataMapper {
 
         this.#validateMapping(options.mapping, input_fields);
 
+        const separator = this.#resolveSeparator(options.separator);
+
         const metadata = { ...upload_options.metadata };
 
         const processedEntries = [];
@@ -183,7 +220,7 @@ class CloudinaryMetadataMapper {
             const schema = this.#lookupFieldSchema(externalId);
 
             try {
-                metadata[externalId] = this.#processMetadataValue(schema, value);
+                metadata[externalId] = this.#processMetadataValue(schema, value, separator);
                 processedEntries.push({
                     input_csv_column_name : csvColumn,
                     input_value           : input_fields[csvColumn],
@@ -220,6 +257,7 @@ class CloudinaryMetadataMapper {
         }
     }
 
+
     /**
      * Looks up a field schema by external ID
      * @private
@@ -237,15 +275,16 @@ class CloudinaryMetadataMapper {
      * @private
      * @param {Object} fieldSchema - Field schema from Cloudinary
      * @param {string} value - Value to process
+     * @param {string} separator - Separator to use for multi-select field values
      * @returns {string|string[]|number} Processed value
      * @throws {Error} If field type is not supported or value cannot be processed
      */
-    #processMetadataValue(fieldSchema, value) {
+    #processMetadataValue(fieldSchema, value, separator) {
         let sanitizedFieldValue;
 
         switch (fieldSchema.type) {
             case CLOUDINARY_FIELD.MultipleSelectionList:
-                sanitizedFieldValue = value.split(',').map((item) => this.#lookupMetadataValueExternalId(fieldSchema, item));
+                sanitizedFieldValue = value.split(separator).map((item) => this.#lookupMetadataValueExternalId(fieldSchema, item));
                 break;
             case CLOUDINARY_FIELD.Date:
                 let date = new Date(value);
