@@ -126,7 +126,7 @@ describe('CloudinaryMetadataMapper', () => {
 
     });
 
-    describe('process', () => {
+    describe('process_Async', () => {
         beforeAll(async () => {
             jest.spyOn(metadata_mapper, 'init_Async').mockImplementation(async () => {
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -291,7 +291,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
         });
 
-        describe('separator functionality', () => {
+        describe('configurable separator support for multi-select value parsing', () => {
             it('should use default comma separator when separator is not provided (undefined)', async () => {
                 const uploadOptions = {};
                 const inputFields = {
