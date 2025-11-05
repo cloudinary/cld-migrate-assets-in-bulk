@@ -110,13 +110,13 @@ const metadata_mapper = require('./cld-structured-metadata-mapper').plugin;
 // Must be the first test to ensure that the metadata_structure is not mocked
 describe('CloudinaryMetadataMapper', () => {
     describe('Not initialized state', () => {
-        it('should throw NotInitializedError when invoking process before initialization', () => {
+        it('should throw NotInitializedError when invoking process before initialization', async () => {
             const uploadOptions = {};
             const inputFields = { "SMD MSL": "MSL Option A" };
             const options = { mapping:{ 'SMD MSL' : 'smd_msl' } };
 
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown')
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.NotInitialized);
@@ -148,7 +148,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = {};
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, null);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, null);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -162,7 +162,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = {};
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -176,7 +176,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping: "not an object" };
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -190,7 +190,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping: { 'SMD Text' : 'smd_msl', 'SMD SSL' : 'smd_msl' } };
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -204,7 +204,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping: { 'Does Not Exist' : 'does_not_exist' } };
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -226,7 +226,7 @@ describe('CloudinaryMetadataMapper', () => {
             };
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -241,7 +241,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
             const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions,inputFields, options);
 
             expect(uploadOptions.metadata.smd_ssl).toEqual('ssl_option_b');
         });
@@ -254,7 +254,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
 
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidDataSourceOption);
@@ -269,7 +269,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
             const options = { mapping:{'SMD MSL' : 'smd_msl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions,inputFields, options);
 
             expect(uploadOptions.metadata.smd_msl).toEqual(['msl_option_c', 'msl_option_a']);
         });
@@ -282,7 +282,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping:{'SMD MSL' : 'smd_msl'} };
 
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidDataSourceOption);
@@ -297,7 +297,7 @@ describe('CloudinaryMetadataMapper', () => {
             };
             const options = { mapping:{'SMD Date' : 'smd_date'} };
         
-            metadata_mapper.process(uploadOptions, inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_date).toEqual("2024-12-25");
         });
@@ -310,7 +310,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping:{'SMD Date' : 'smd_date'} };
 
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.FailedToProcessMetadataValue);
@@ -327,7 +327,7 @@ describe('CloudinaryMetadataMapper', () => {
             };
             const options = { mapping:{'SMD Number' : 'smd_number'} };
 
-            metadata_mapper.process(uploadOptions, inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_number).toEqual("42"); // still a string since no coercion is done
         });
@@ -339,7 +339,7 @@ describe('CloudinaryMetadataMapper', () => {
             };
             const options = { mapping:{'SMD Text' : 'smd_text'} };
         
-            metadata_mapper.process(uploadOptions, inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions, inputFields, options);
         
             expect(uploadOptions.metadata.smd_text).toEqual("Hello world");
         });
@@ -358,7 +358,7 @@ describe('CloudinaryMetadataMapper', () => {
             };
 
             try {
-                metadata_mapper.process(uploadOptions,inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions,inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
@@ -373,7 +373,7 @@ describe('CloudinaryMetadataMapper', () => {
             }
             const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
 
-            metadata_mapper.process(uploadOptions,inputFields, options);
+            await metadata_mapper.process_Async(uploadOptions,inputFields, options);
 
             expect(uploadOptions).not.toHaveProperty('metadata');
         });
@@ -387,7 +387,7 @@ describe('CloudinaryMetadataMapper', () => {
             const options = { mapping:{'SMD SSL' : 'smd_ssl'} };
             
             try {
-                metadata_mapper.process(uploadOptions, inputFields, options);
+                await metadata_mapper.process_Async(uploadOptions, inputFields, options);
                 fail('Expected an error to be thrown');
             } catch (error) {
                 expect(error.name).toEqual(MOCK_ERROR_NAMES.InvalidMapping);
