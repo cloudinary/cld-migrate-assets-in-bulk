@@ -29,7 +29,7 @@ Use the [cld-structured-metadata-mapper](../__plugins/cld-structured-metadata-ma
 3. **Logging**  
    * The `init_Async` method receives an instance of a logger
       + This logger is ONLY intended to be used on plugin initialization
-      + If you use this logger in the `process_Async` - you'll have to "stitch" contest from different log records 
+      + If you use this logger in the `process_Async` - you'll have to "stitch" context from different log records 
 
    * To simplify troubleshooting, have the `process_Async()` method of a plugin produce some sort of a "trace record"
       + When persisted to `plugins_trace` (in the [__input-to-api-payload.js](../__input-to-api-payload.js) module), this approach retains plugin's "trace" as part of a single migration record for each asset simplifying troubleshooting of each individual operation
