@@ -13,6 +13,18 @@ The CSV file you create will serve as the input for the migration script. Before
 - Consider preparing a document that maps the taxonomy from your current workflow to the one in Cloudinary. 
     - This document will not only help clarify the migration process but can also serve as future documentation for your team.
 
+### Prepare date field values for parsing
+
+If you need to assign [Date structured metadata values](https://cloudinary.com/documentation/admin_api#metadata_field_structure) - make sure the stringified values in the asset data file use:
+
+- (Preferred) [Date Time String Format supported by Ecma Standard specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format)
+- `MM/DD/YYYY` order in date representation for it to be correctly parsed by legacy date parsing implementation
+
+Then you will be able to leverage default Structured Metadata Mapper plugin for automated date parsing.
+See `applyStructuredMetadataMapperPlugin_Async` starter implementation in the [__input-to-api-payload](../__input-to-api-payload.js) module.
+
+Alternatively, if neither option is feasible and you must have stringified date values in format such as `DD/MM/YYYY` - you can add your own method in the [__input-to-api-payload](../__input-to-api-payload.js) module to accurately parse date values and convert to the [representation demanded by Cloudinary `date` field specification](https://cloudinary.com/documentation/admin_api#metadata_field_structure).
+
 ## Migrate High-Quality Assets 🔗
 
 - When building CSV input file and referencing assets via URLs or file paths:
