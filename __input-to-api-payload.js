@@ -102,10 +102,12 @@ async function applyStructuredMetadataMapperPlugin_Async(options, csvRec) {
             'SMD Text CSV Column Name': 'smd_text_field_external_id', // Map text values from CSV file to 'smd_text_field_external_id' SMD field
             'SMD Num CSV Column Name' : 'smd_num_field_external_id',  // Map numeric values from CSV file to 'smd_num_field_external_id' SMD field
             'SMD Date CSV Column Name': 'smd_date_field_external_id', // Map date values from CSV file to 'smd_date_field_external_id' SMD field
+                                                                      // ⚠️ see notes in `readme/data-for-the-migration.md#prepare-date-field-values-for-parsing` to ensure correct date values parsing
             'SMD SSL CSV Column Name' : 'smd_ssl_field_external_id',  // Map single-select values (assumed to be labels) from CSV file to 'smd_ssl_field_external_id' SMD field
             'SMD MSL CSV Column Name' : 'smd_msl_field_external_id'   // Map multi-select values (assumed to be labels) from CSV file to 'smd_msl_field_external_id' SMD field
-        }
-    });
+        },
+        separator: ','  // Optional separator to use for multi-select value parsing (default is comma)
+     });
 
     // Storing output of the plugin to include in the combined log record
     return { name: smdPluginName, trace: smdMappingTrace };

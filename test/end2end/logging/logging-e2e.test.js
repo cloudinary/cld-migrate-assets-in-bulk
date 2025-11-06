@@ -70,6 +70,25 @@ describe('Logging Module - End-to-End Sequence', () => {
     expect(consoleOutput[2].args).toContain('[plugins] ');
     expect(consoleOutput[2].args).toContain('fallback log - plugins');
 
+    // Confirm the plugin logger can be created before initialization
+    const beforeInitiPluginLogger = logging.createPluginLogger('test-plugin-berfore-init');
+    beforeInitiPluginLogger.info('plugin info msg');
+    beforeInitiPluginLogger.warn('plugin warn msg');
+    beforeInitiPluginLogger.error('plugin error msg');
+
+    expect(consoleOutput.length).toBe(6);  // 3 fallback logs previously + 3 plugin logs now
+    expect(consoleOutput[3].method).toBe('log');
+    expect(consoleOutput[3].args).toContain('[plugins:test-plugin-berfore-init] ');
+    expect(consoleOutput[3].args).toContain('plugin info msg');
+
+    expect(consoleOutput[4].method).toBe('warn');
+    expect(consoleOutput[4].args).toContain('[plugins:test-plugin-berfore-init] ');
+    expect(consoleOutput[4].args).toContain('plugin warn msg');
+
+    expect(consoleOutput[5].method).toBe('error');
+    expect(consoleOutput[5].args).toContain('[plugins:test-plugin-berfore-init] ');
+    expect(consoleOutput[5].args).toContain('plugin error msg');
+
     // Initialize logging to log file
     const { logFile } = logging.setupLogInFolder(LOG_DIR);
     expect(logFile).toBe(LOG_FILE);
@@ -81,6 +100,17 @@ describe('Logging Module - End-to-End Sequence', () => {
     logging.script.info('script info after init');
     logging.payload.warn('payload warn after init');
     logging.plugins.error('plugins error after init');
+
+    const testAfterInitPluginName = 'test-plugin-after-init';
+    const afterInitPluginLogger = logging.createPluginLogger(testAfterInitPluginName);
+    // Only the log message
+    afterInitPluginLogger.info('plugin info msg');
+    afterInitPluginLogger.warn('plugin warn msg');
+    afterInitPluginLogger.error('plugin error msg');
+    // Log message and object
+    afterInitPluginLogger.info({ object: { a: 'a', b: 'b' } }, 'plugin info msg with object');
+    afterInitPluginLogger.warn({ object: { a: 'a', b: 'b' } }, 'plugin warn msg with object');
+    afterInitPluginLogger.error({ object: { a: 'a', b: 'b' } }, 'plugin error msg with object');
     
     // The logger, once initialized, should no longer log to console (fallback is replaced)
     expect(consoleOutput.length).toBe(0);
@@ -99,7 +129,7 @@ describe('Logging Module - End-to-End Sequence', () => {
     let parsed = lines.map((l) => JSON.parse(l));
 
     // Confirm the log file contains the expected messages
-    expect(parsed.length).toBe(3);
+    expect(parsed.length).toBe(9); // 3 log messages + 6 plugin logs
     expect(parsed[0].msg).toBe('script info after init');
     expect(parsed[0].level).toBe(30);
 
@@ -108,6 +138,27 @@ describe('Logging Module - End-to-End Sequence', () => {
 
     expect(parsed[2].msg).toBe('plugins error after init');
     expect(parsed[2].level).toBe(50);
+
+    expect(parsed[3].msg).toBe('plugin info msg');
+    expect(parsed[3].plugin).toBe(testAfterInitPluginName);
+
+    expect(parsed[4].msg).toBe('plugin warn msg');
+    expect(parsed[4].plugin).toBe(testAfterInitPluginName);
+
+    expect(parsed[5].msg).toBe('plugin error msg');
+    expect(parsed[5].plugin).toBe(testAfterInitPluginName);
+
+    expect(parsed[6].msg).toBe('plugin info msg with object');
+    expect(parsed[6].plugin).toBe(testAfterInitPluginName);
+    expect(parsed[6]).toHaveProperty('object');
+
+    expect(parsed[7].msg).toBe('plugin warn msg with object');
+    expect(parsed[7].plugin).toBe(testAfterInitPluginName);
+    expect(parsed[7]).toHaveProperty('object');
+
+    expect(parsed[8].msg).toBe('plugin error msg with object');
+    expect(parsed[8].plugin).toBe(testAfterInitPluginName);
+    expect(parsed[8]).toHaveProperty('object');
 
     // Confirm Error.prototype has toJSON. Then log a custom error and confirm it's logged.
     expect(typeof Error.prototype.toJSON).toBe('function');
