@@ -15,15 +15,15 @@ The CSV file you create will serve as the input for the migration script. Before
 
 ### Prepare date field values for parsing
 
-If you need to assign [Date structured metadata values](https://cloudinary.com/documentation/admin_api#metadata_field_structure) - make sure the stringified values in the asset data file use:
+If data file includes date values to be assigned to [Cloudinary `date` structured metadata field](https://cloudinary.com/documentation/admin_api#metadata_field_structure) - make sure the stringified values in the data file use:
 
 - (Preferred) [Date Time String Format supported by Ecma Standard specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format)
-- `MM/DD/YYYY` order in date representation for it to be correctly parsed by legacy date parsing implementation
+- `MM/DD/YYYY` order in date representation (for it to be correctly parsed by legacy date parsing implementation)
 
-Then you will be able to leverage default Structured Metadata Mapper plugin for automated date parsing.
-See `applyStructuredMetadataMapperPlugin_Async` starter implementation in the [__input-to-api-payload](../__input-to-api-payload.js) module.
+Using these formats allows you to leverage the default Structured Metadata Mapper plugin for automated date parsing. See the `applyStructuredMetadataMapperPlugin_Async` starter implementation in the [__input-to-api-payload](../__input-to-api-payload.js) module.
 
-Alternatively, if neither option is feasible and you must have stringified date values in format such as `DD/MM/YYYY` - you can add your own method in the [__input-to-api-payload](../__input-to-api-payload.js) module to accurately parse date values and convert to the [representation demanded by Cloudinary `date` field specification](https://cloudinary.com/documentation/admin_api#metadata_field_structure).
+**Custom date formats:**
+If you must use other formats (such as `DD/MM/YYYY`), add a custom parsing method in the [__input-to-api-payload](../__input-to-api-payload.js) module. Your method should parse the date values and convert them to the [representation required by Cloudinary's `date` field specification](https://cloudinary.com/documentation/admin_api#metadata_field_structure).
 
 ## Migrate High-Quality Assets 🔗
 
