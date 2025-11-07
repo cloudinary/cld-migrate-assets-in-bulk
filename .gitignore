@@ -1,5 +1,6 @@
-.env
-*.env
+.env*
+*.env*
 node_modules/*
 *.jsonl
-*.csv
+input.csv
+report.csv

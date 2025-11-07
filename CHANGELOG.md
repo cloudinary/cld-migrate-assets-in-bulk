@@ -1,5 +1,23 @@
 # CHANGELOG
 
+[3.0.0] / 2025-10-08
+====================
+
+### Added
+- Opt-in plugin mechanism to inject custom logic into migration flow without modifying core codebase
+- Plugins documentation [./readme/plugins.md](./readme/plugins.md)
+- Structured metadata mapper plugin [./__plugins/cld-structured-metadata-mapper.js](./__plugins/cld-structured-metadata-mapper.js)
+- [Dev end-to-end test](./readme/dev/readme.md#dev-end2end-tests) for the default payload and structured metadata mapper plugin
+
+### Changed
+- Refactored `__input-to-api-payload.js` to support asynchronous operations for scenarios when plugin needs to make API calls
+- Explicit SDK timeout configuration for network operations
+
+### Breaking Changes
+- The `__input-to-api-payload.js` module now requires asynchronous processing patterns
+- Migration payload structure now includes `plugins_trace` property for passing output from plugin execution to the main routine for logging
+
+
 [2.1.2] / 2025-06-25
 ====================
 

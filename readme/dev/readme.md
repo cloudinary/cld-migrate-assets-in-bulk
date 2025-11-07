@@ -14,6 +14,17 @@ Custom configuration is used - see the `scripts.test` in `package.json`.
 
 Test modules are maintained under the `test` folder.
 
+## Customizations
+
+### Confirmation Prompt
+
+If you need to run the tool in scenarios when the confirmation user prompt becomes a blocker - you may find [modification suggested in this pull request](https://github.com/cloudinary/cld-migrate-assets-in-bulk/pull/13) to be of help.
+
+### Plugins
+
+You can execute custom logic as part of the migration loop when calculating parameters for each migration operation.
+
+The concept is explained in more details [here](../plugins.md).
 
 ## End2End Tests
 End to end tests require to be executed in certain order (see the `test/jest.run-all-tests.js` file).
@@ -21,3 +32,11 @@ End to end tests require to be executed in certain order (see the `test/jest.run
 - a temporary cloud is provisioned when running tests
 - if you want to use a different cloud (for debugging purposes, for example) - place `.env` file with Cloudinary credentials under the `test/end2end` folder
     * then the test migration operations will be performed against that cloud
+
+### Dev End2End tests
+
+Because the `__input-to-api-payload.js` module is intended to be modified - the end-to-end test for it is not executed with `npm test`.
+
+But you may want to test the default payload for example, when making change to another module of the app. 
+Use `npm run test-dev`. It runs all the same tests as `npm test` but then also executes end-to-end test for the default payload.
+The test setup assumes the `__input-to-api-payload.js` was not modified.

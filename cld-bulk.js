@@ -57,7 +57,7 @@ function configureProgram(program) {
     program
         .name('cld-bulk')
         .description('Extensible CLI tool to efficiently translate CSV file records into Cloudinary API operations')
-        .version('2.1.2');
+        .version('3.0.0');
 }
 
 
@@ -69,7 +69,6 @@ function configureCommands(program) {
         .showHelpAfterError()
         .allowUnknownOption(false)
         .action(async (cliArgs, cliCommand) => {
-            console.log('migrate payload');
             await mainLoop.loopOverCsvInput_Async(
                 cliArgs,
                 cliCommand,

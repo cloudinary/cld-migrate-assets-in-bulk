@@ -12,16 +12,18 @@ const TEST_OUTPUT_FOLDER = path.join(__dirname, 'test-output');
 // produced CSV input for the test
 jest.mock('../../../__input-to-api-payload', () => {
     return {
-        input2ApiPayload: jest.fn((csvRec) => {
+        input2ApiPayload_Async: jest.fn(async (csvRec) => {
             return {
-                file: csvRec.Ref,
-                options: {
-                    public_id: csvRec.public_id,
-                    unique_filename: false,
-                    overwrite: false, // << Disable overwriting assets
-                    resource_type: 'auto',
-                    type: 'upload',        
-                }
+                "payload" : {
+                    file: csvRec.Ref,
+                    options: {
+                        public_id: csvRec.public_id,
+                        unique_filename: false,
+                        resource_type: 'auto',
+                        type: 'upload',        
+                    }
+                },
+                "plugins_trace": {}
             };
         })
     };
@@ -40,7 +42,6 @@ let __TEST_LOG = null;
 let __TEST_REPORT = null;
 
 // Reduce number of test records to speed up execution
-
 let __TEST_DATA = testMigrationRecords.reduceTestRecords(
     10, 
     testMigrationRecords.POSITIVE_ONLY
@@ -89,7 +90,7 @@ describe('Overwriting enabled', () => {
         const testReportEntry = testReportEntries[0];
         expect(testReportEntry.Cld_PublicId).toEqual(public_id);
         expect(testReportEntry.Cld_Status).toEqual('MIGRATED');
-        expect(testReportEntry.Cld_Operation).toEqual('SkippedAlreadyExists');
+        expect(testReportEntry.Cld_Operation).toEqual('Overwritten');
     });
 
 });

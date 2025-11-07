@@ -23,16 +23,17 @@ For larger migrations with hundreds of thousands of assets, it's advisable to ru
         + All fields from the corresponding input CSV file record.
         + The Cloudinary API payload it was converted to.
         + The API response.
+        + Execution trace produced by [plugins](./plugins.md) (if any used)
 
 # Deploying the Script into the Runtime
 
-## Fork the Repository 🍴
+## Fork or Import the Repository 🍴
 
-- It's advisable to start by forking this repository so you can maintain any customizations and keep a history of changes.
+- It's advisable to start by forking or importing this repository so you can maintain any customizations and keep a history of changes.
 
 ## Clone the Repository 👯
 
-- Clone the forked repository onto your system.
+- Clone the forked (imported) repository onto your system.
 
 ## Install Node.js 🛠️
 

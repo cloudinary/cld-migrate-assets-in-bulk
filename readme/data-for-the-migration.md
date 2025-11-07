@@ -13,13 +13,20 @@ The CSV file you create will serve as the input for the migration script. Before
 - Consider preparing a document that maps the taxonomy from your current workflow to the one in Cloudinary. 
     - This document will not only help clarify the migration process but can also serve as future documentation for your team.
 
+### Prepare date field values for parsing
+
+If data file includes date values to be assigned to [Cloudinary `date` structured metadata field](https://cloudinary.com/documentation/admin_api#metadata_field_structure) - make sure the stringified values in the data file use:
+
+- (Preferred) [Date Time String Format supported by Ecma Standard specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format)
+- `MM/DD/YYYY` order in date representation (for it to be correctly parsed by Nodejs "legacy" date parsing implementation)
+
+Using these formats allows you to leverage the default Structured Metadata Mapper plugin for automated date parsing. See the `applyStructuredMetadataMapperPlugin_Async` starter implementation in the [__input-to-api-payload](../__input-to-api-payload.js) module.
+
+**Custom date formats:**
+If you must use other formats (such as `DD/MM/YYYY`), add a custom parsing method in the [__input-to-api-payload](../__input-to-api-payload.js) module. Your method should parse the date values and convert them to the [representation required by Cloudinary's `date` field specification](https://cloudinary.com/documentation/admin_api#metadata_field_structure).
+
 ## Migrate High-Quality Assets 🔗
 
 - When building CSV input file and referencing assets via URLs or file paths:
     - Make sure to reference the assets in the largest available dimensions (to allow for highest quality transformations).
     - Make sure the referenced assets have had the least aggressive compression algorithms applied prior to being migrated (to avoid visual artifacts).
-
-## Use External IDs for Structured Metadata 🛠️
-
-- Translate [Cloudinary's structured metadata values for single- and multi-select fields](https://cloudinary.com/documentation/dam_admin_structured_metadata#external_id) to external IDs.
-    - This translation can be done either in the tool you use to generate the CSV file or by adding custom logic to the [__input-to-api-payload.js](../__input-to-api-payload.js) module.
